@@ -830,10 +830,10 @@ async function openManagement(user){
  if(!user){toast('❌ Login required');return}
  currentAuthUser=user;
  await loadSettings();
- const syncedProfile=await ensureUserProfile(user);
+ await ensureUserProfile(user);
  await applyManagementAccess(user);
 }
-function closeManagement(){clearManagementFilePicker();toggleManagementMenu(false);document.getElementById('managementPanel').classList.remove('open');document.body.style.overflow=''}
+function closeManagement(){clearManagementFilePicker();try{localStorage.removeItem('mbus_management_active_card')}catch(e){}toggleManagementMenu(false);document.getElementById('managementPanel').classList.remove('open');document.body.style.overflow=''}
 
 function fillForm(){
  const map={mYears:'years',mNavratri:'navratri',mArrival:'arrival',mMaha:'maha',mShringar:'shringar',mMorning:'morning',mEveningAarti:'eveningAarti',mMahaAarti:'mahaAarti',mPrasad:'prasad',mPandit:'pandit',mPresident:'president',mTreasurer:'treasurer',mUpi:'upi',mDonation:'donation',mPhone:'phone',mEmail:'email',mAddress:'address',mMap:'map'};
@@ -885,7 +885,9 @@ function saveRemoteExtras(key,value){
   const {data,error}=await sb.from('site_settings').select('settings').eq('id',1).maybeSingle();
   if(error)throw error;
   const next={...(data?.settings||{}),...(settings||{}),[key]:value};
-  const {error:upErr}=await sb.from('site_settings').upsert({id:1,settings:next},{onConflict:'id'});
+  if(!data)throw new Error('site_settings id=1 row नहीं मिली।');
+  // id is GENERATED ALWAYS AS IDENTITY; update the existing row instead of upsert(id=1).
+  const {error:upErr}=await sb.from('site_settings').update({settings:next}).eq('id',1);
   if(upErr)throw upErr;
   settings=next;
   return true;
@@ -931,7 +933,10 @@ async function saveSettings(){
 }
 function remoteSaveWholeSettings(nextSettings){
  const job=remoteWriteQueue.then(async()=>{
-  const {error}=await sb.from('site_settings').upsert({id:1,settings:nextSettings},{onConflict:'id'});
+  const {data,error:readErr}=await sb.from('site_settings').select('id').eq('id',1).maybeSingle();
+  if(readErr)throw readErr;
+  if(!data)throw new Error('site_settings id=1 row नहीं मिली।');
+  const {error}=await sb.from('site_settings').update({settings:nextSettings}).eq('id',1);
   if(error)throw error;
   settings={...nextSettings};
   return true;
@@ -1229,12 +1234,18 @@ async function applyManagementAccess(user){
  }catch(e){console.warn('Profile read:',e)}
  if(isOwner){
    panel.classList.add('open');document.body.style.overflow='hidden';titleEl.textContent='⚙️ Owner Management Panel';roleEl.textContent='Owner • Full Management Access';
-   renderCurrentUserIdCard(user,profile,null,true);renderManagementMenu(ACCESS_KEYS);loadFinalForms();loadRegisteredUsers();loadApprovedTeamMembers();syncLocalMediaToCloud();return true;
+   renderCurrentUserIdCard(user,profile,null,true);renderManagementMenu(ACCESS_KEYS);loadFinalForms();loadRegisteredUsers();loadApprovedTeamMembers();
+   // Keep the same management card open after Android file-picker/page lifecycle events.
+   let active='';try{active=localStorage.getItem('mbus_management_active_card')||''}catch(e){}
+   if(active&&ACCESS_KEYS.includes(active))setTimeout(()=>openManagementMenu(active),0);
+   syncLocalMediaToCloud();return true;
  }
  const approved=profile?.status==='approved',isTeam=approved&&!!member;
  if(!isTeam){toast(approved?'✓ Login successful. Team access अभी assigned नहीं है।':'✓ Signup/Login successful. Owner approval के बाद Team access मिलेगा।');return false}
  const perms=normalizePerms(profile?.permissions||member.permissions);panel.classList.add('open');document.body.style.overflow='hidden';titleEl.textContent='⚙️ Team Management Panel';roleEl.textContent=`Team Member • ${profile?.full_name||member.name||email} • Assigned Access`;
- renderCurrentUserIdCard(user,profile,member,false);renderManagementMenu(ACCESS_KEYS.filter(k=>perms[k]));loadFinalForms();return true;
+ renderCurrentUserIdCard(user,profile,member,false);const allowedKeys=ACCESS_KEYS.filter(k=>perms[k]);renderManagementMenu(allowedKeys);loadFinalForms();
+ let active='';try{active=localStorage.getItem('mbus_management_active_card')||''}catch(e){}
+ if(active&&allowedKeys.includes(active))setTimeout(()=>openManagementMenu(active),0);return true;
 }
 function renderCurrentUserIdCard(user,profile,member,isOwner){
  const box=document.getElementById('currentUserIdCard');if(!box)return;
@@ -1329,6 +1340,7 @@ function openManagementMenu(key){
  const target='card'+key.charAt(0).toUpperCase()+key.slice(1),cards=[...document.querySelectorAll('#managementPanel .manager-card[data-access]')];
  cards.forEach(c=>c.style.display='none');
  const el=document.getElementById(target);if(el)el.style.display='block';
+ try{localStorage.setItem('mbus_management_active_card',key)}catch(e){}
  document.querySelectorAll('.management-menu-btn').forEach(b=>b.classList.toggle('active',b.dataset.target===target));
  toggleManagementMenu(false);
  document.getElementById(target)?.scrollIntoView({behavior:'smooth',block:'start'});
@@ -1478,6 +1490,8 @@ function restoreManagementPanelAfterFilePicker(){
     if(!panel)return;
     panel.classList.add('open');
     document.body.style.overflow='hidden';
+    let active='';try{active=localStorage.getItem('mbus_management_active_card')||''}catch(e){}
+    if(active)setTimeout(()=>openManagementMenu(active),0);
     sb.auth.getSession().then(({data})=>{
       if(data?.session?.user){
         currentAuthUser=data.session.user;
@@ -1520,7 +1534,14 @@ window.addEventListener('focus',()=>{restoreManagementPanelAfterFilePicker();set
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){restoreManagementPanelAfterFilePicker();setTimeout(bindManagementFileInputs,100);setTimeout(restoreManagementPanelAfterFilePicker,350)}});
 setTimeout(bindManagementFilePickerGuard,500);
 
-sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user){closeAuthPanel();openManagement(session.user)}});
+sb.auth.onAuthStateChange((event,session)=>{
+ if(event==='SIGNED_IN'&&session?.user){
+   // Do not rebuild the Management Panel while Android's file picker is active.
+   // Rebuilding it can leave the selected file visible but detach it from the Save button.
+   if(filePickerGuardActive()){currentAuthUser=session.user;restoreManagementPanelAfterFilePicker();return}
+   closeAuthPanel();openManagement(session.user);
+ }
+});
 window.addEventListener('unhandledrejection',e=>{console.error('Unhandled promise:',e.reason);toast('❌ कोई online operation पूरा नहीं हुआ। फिर से Save करें।')});
 </script>
 </body>
