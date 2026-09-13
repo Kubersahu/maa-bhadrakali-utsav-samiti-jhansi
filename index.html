@@ -1451,22 +1451,37 @@ async function init(){
 /* ===== ANDROID FILE PICKER / MANAGEMENT PANEL STAY-OPEN FIX ===== */
 const MANAGEMENT_FILE_PICKER_KEY='mbus_management_file_picker_open';
 function markManagementFilePicker(){
-  try{localStorage.setItem(MANAGEMENT_FILE_PICKER_KEY,'1')}catch(e){}
+  try{
+    localStorage.setItem(MANAGEMENT_FILE_PICKER_KEY,'1');
+    localStorage.setItem(MANAGEMENT_FILE_PICKER_KEY+'_time',String(Date.now()));
+  }catch(e){}
 }
 function clearManagementFilePicker(){
-  try{localStorage.removeItem(MANAGEMENT_FILE_PICKER_KEY)}catch(e){}
+  try{
+    localStorage.removeItem(MANAGEMENT_FILE_PICKER_KEY);
+    localStorage.removeItem(MANAGEMENT_FILE_PICKER_KEY+'_time');
+  }catch(e){}
+}
+function filePickerGuardActive(){
+  try{
+    if(localStorage.getItem(MANAGEMENT_FILE_PICKER_KEY)!=='1')return false;
+    const t=Number(localStorage.getItem(MANAGEMENT_FILE_PICKER_KEY+'_time')||0);
+    return t && (Date.now()-t)<30000;
+  }catch(e){return false}
 }
 function restoreManagementPanelAfterFilePicker(){
+  if(!filePickerGuardActive())return;
   try{
-    if(localStorage.getItem(MANAGEMENT_FILE_PICKER_KEY)!=='1')return;
     const panel=document.getElementById('managementPanel');
     if(!panel)return;
-    const sessionPromise=sb.auth.getSession();
-    sessionPromise.then(({data})=>{
-      const user=data?.session?.user;
-      if(!user)return;
-      panel.classList.add('open');
-      document.body.style.overflow='hidden';
+    panel.classList.add('open');
+    document.body.style.overflow='hidden';
+    sb.auth.getSession().then(({data})=>{
+      if(data?.session?.user){
+        currentAuthUser=data.session.user;
+        panel.classList.add('open');
+        document.body.style.overflow='hidden';
+      }
     }).catch(()=>{});
   }catch(e){}
 }
@@ -1474,14 +1489,18 @@ function bindManagementFileInputs(){
   document.querySelectorAll('#managementPanel input[type="file"]').forEach(inp=>{
     if(inp.dataset.filePickerBound==='1')return;
     inp.dataset.filePickerBound='1';
-    inp.addEventListener('click',markManagementFilePicker,{passive:true});
-    inp.addEventListener('change',()=>{
-      clearManagementFilePicker();
+    inp.addEventListener('click',()=>{
+      markManagementFilePicker();
       const panel=document.getElementById('managementPanel');
-      if(panel&&currentAuthUser){
-        panel.classList.add('open');
-        document.body.style.overflow='hidden';
-      }
+      if(panel){panel.classList.add('open');document.body.style.overflow='hidden';}
+    },{passive:true});
+    inp.addEventListener('change',()=>{
+      // Android can briefly recreate the page after returning from the file picker.
+      // Keep the panel open for a short safety window; do not close it here.
+      markManagementFilePicker();
+      const panel=document.getElementById('managementPanel');
+      if(panel){panel.classList.add('open');document.body.style.overflow='hidden';}
+      setTimeout(()=>clearManagementFilePicker(),5000);
     });
   });
 }
@@ -1493,10 +1512,10 @@ function bindManagementFilePickerGuard(){
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-sb.auth.getSession().then(({data})=>{if(data?.session){closeAuthPanel();openManagement(data.session.user);setTimeout(restoreManagementPanelAfterFilePicker,120)}});
-window.addEventListener('pageshow',()=>{restoreManagementPanelAfterFilePicker();setTimeout(bindManagementFileInputs,100)});
-window.addEventListener('focus',()=>{restoreManagementPanelAfterFilePicker();setTimeout(bindManagementFileInputs,100)});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){restoreManagementPanelAfterFilePicker();setTimeout(bindManagementFileInputs,100)}});
+sb.auth.getSession().then(({data})=>{if(data?.session){closeAuthPanel();openManagement(data.session.user).then(()=>{if(filePickerGuardActive())restoreManagementPanelAfterFilePicker()})}});
+window.addEventListener('pageshow',()=>{restoreManagementPanelAfterFilePicker();setTimeout(bindManagementFileInputs,100);setTimeout(restoreManagementPanelAfterFilePicker,350)});
+window.addEventListener('focus',()=>{restoreManagementPanelAfterFilePicker();setTimeout(bindManagementFileInputs,100);setTimeout(restoreManagementPanelAfterFilePicker,350)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){restoreManagementPanelAfterFilePicker();setTimeout(bindManagementFileInputs,100);setTimeout(restoreManagementPanelAfterFilePicker,350)}});
 setTimeout(bindManagementFilePickerGuard,500);
 
 sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user){closeAuthPanel();openManagement(session.user)}});
