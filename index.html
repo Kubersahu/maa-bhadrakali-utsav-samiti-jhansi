@@ -1219,7 +1219,8 @@ async function applyManagementAccess(user){
  const roleEl=document.getElementById('managerRole'),titleEl=document.getElementById('managerTitle'),panel=document.getElementById('managementPanel');
  const cards=[...document.querySelectorAll('#managementPanel .manager-card[data-access]')];
  cards.forEach(c=>c.style.display='none');
- panel.classList.remove('open');document.body.style.overflow='';
+ // Android may run auth/lifecycle code when the native file picker closes.
+ // Do not close the already-open management panel during this access refresh.
  let profile=null;
  try{
    const {data}=await sb.from('user_profiles').select('*').eq('id',user.id).maybeSingle();
