@@ -1021,7 +1021,10 @@ async function uploadPublicMedia(file,folder){
  const {data:sessionData}=await sb.auth.getSession();if(!sessionData?.session)throw new Error('Supabase login session नहीं मिली।');
  if(!file)throw new Error('कोई file select नहीं की गई।');
  if(file.size>100*1024*1024)throw new Error('File 100MB से बड़ी है।');
- const ext=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'')||'bin';
+ const originalName=String(file?.name||'');
+  const extFromName=originalName.includes('.')?originalName.split('.').pop():'';
+  const mimeExt=String(file?.type||'').split('/').pop();
+  const ext=(extFromName||mimeExt||'bin').toLowerCase().replace(/[^a-z0-9]/g,'')||'bin';
  const safeFolder=String(folder||'uploads').replace(/[^a-zA-Z0-9_\/-]/g,'');
  const path=safeFolder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,9)+'.'+ext;
  const {error}=await sb.storage.from('site-media').upload(path,file,{upsert:false,contentType:file.type||'application/octet-stream',cacheControl:'31536000'});
