@@ -572,7 +572,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
   display:flex!important;
   flex-direction:row!important;
   width:100%!important;
-  transform:translateX(0)!important;
+  /* JS controls the slide position; do not force it back to slide 1. */
   transition:transform .4s ease!important;
 }
 #gallery [data-gallery-slider="four"] .gallery-slide{
@@ -868,6 +868,7 @@ const defaults={
 };
 let settings={...defaults};
 let currentAuthUser=null;
+let explicitManagementLogin=false;
 const ACCESS_KEYS=["banners","utsav","aarti","committee","prasad","live","video","creator","text","seo","gallery","team","social","logo","contact","map","registrationIds","registrationRequests","approvedTeam"];
 const MENU_ITEMS={
  banners:"🖼️ Banners",utsav:"🌺 उत्सव जानकारी",aarti:"🪔 आरती / पूजा",committee:"👑 पदाधिकारी",prasad:"🍚 प्रसाद / Donation",live:"🔴 Live Aarti",video:"🎬 Video",creator:"👨‍💻 Website Creator",text:"✏️ Website Text",seo:"🔍 Google SEO Description",gallery:"📸 Gallery",team:"👥 Team Members",social:"📱 Social Media",logo:"🎨 Logo",contact:"📞 Contact",map:"📍 Google Map",registrationIds:"🪪 Registration ID View",registrationRequests:"📨 New Registration Requests",approvedTeam:"✅ Approved Team Members"};
@@ -895,6 +896,7 @@ function switchAuth(mode){
 }
 
 async function topLogin(){
+ explicitManagementLogin=true;
  const email=document.getElementById('topEmail')?.value.trim(),pass=document.getElementById('topPassword')?.value||'';
  const msg=document.getElementById('authMsg');
  if(!email||!pass){if(msg)msg.textContent='❌ Email और password भरें।';return}
@@ -904,6 +906,7 @@ async function topLogin(){
  closeAuthPanel();await openManagement(data.user);toast('✓ Supabase Login successful');
 }
 async function googleAuth(){
+ explicitManagementLogin=true;
  const msg=document.getElementById('authMsg');
  if(msg)msg.textContent='⏳ Google → Supabase Auth खुल रहा है…';
  const redirectTo='https://kubersahu.github.io/maa-bhadrakali-utsav-samiti-jhansi/';
@@ -1142,7 +1145,35 @@ async function compressGalleryImage(file,max=1400){
  }catch(e){return file}
 }
 async function saveGalleryPhotosOnly(){const d={...finalGet('mbus_gallery_final',{})};try{for(let i=1;i<=3;i++){const f=document.getElementById('mGallery'+i)?.files[0];if(f)d['p'+i]=await uploadPublicMedia(await compressGalleryImage(f),'gallery/photos');const cap=document.getElementById('mCaption'+i)?.value.trim();if(cap)d['c'+i]=cap;else if(!d['c'+i])d['c'+i]='Photo '+i}for(let i=1;i<=4;i++){const f=document.getElementById('mGallery4_'+i)?.files[0];if(f)d['s'+i]=await uploadPublicMedia(await compressGalleryImage(f),'gallery/slider')}const sf=document.getElementById('mGallerySingle')?.files[0];if(sf)d.single=await uploadPublicMedia(await compressGalleryImage(sf),'gallery/photos');d.singleCap=document.getElementById('mCaptionSingle')?.value.trim()||'विशेष उत्सव फोटो';finalStore('mbus_gallery_final',d);if(await saveRemoteExtras('gallery',d)){renderFinalGalleryMedia();toast('✓ Gallery photo save हो गई। सभी phones पर दिखेगी।')}else toast('⚠️ Gallery photos local save हुईं।')}catch(e){console.error(e);const st=document.getElementById('mGalleryList');if(st)st.textContent='❌ '+(e?.message||'Gallery save नहीं हुई।');toast('❌ Gallery photos save नहीं हुईं: '+(e?.message||''))}}
-async function saveVideosOnly(){const d={...finalGet('mbus_gallery_final',{})};try{for(let i=1;i<=3;i++){const f=document.getElementById('mVideo'+i)?.files[0];if(f){if(f.size>100*1024*1024)throw new Error('Video '+i+' 100MB से बड़ा है।');d['v'+i]=await uploadPublicMedia(f,'gallery/videos')}}finalStore('mbus_gallery_final',d);if(await saveRemoteExtras('gallery',d)){renderFinalGalleryMedia();toast('✓ Video save हो गया। सभी phones पर दिखेगा।')}else toast('⚠️ Videos local save हुए।')}catch(e){console.error(e);toast('❌ Videos save नहीं हुए: '+(e?.message||''))}}
+async function saveVideosOnly(){
+ const d={...finalGet('mbus_gallery_final',{})};
+ const status=document.getElementById('mVideoList');
+ try{
+  if(!requireAuthenticated())return;
+  if(status)status.textContent='⏳ Videos upload हो रहे हैं…';
+  let uploaded=0;
+  for(let i=1;i<=3;i++){
+   const input=document.getElementById('mVideo'+i);
+   const f=input?.files?.[0];
+   if(!f)continue;
+   if(f.size>100*1024*1024)throw new Error('Video '+i+' 100MB से बड़ा है।');
+   if(!String(f.type||'').startsWith('video/'))throw new Error('Video '+i+' सही video file नहीं है।');
+   d['v'+i]=await uploadPublicMedia(f,'gallery/videos');
+   uploaded++;
+  }
+  if(!uploaded)throw new Error('पहले कम से कम 1 video select करें।');
+  finalStore('mbus_gallery_final',d);
+  const ok=await saveRemoteExtras('gallery',d);
+  if(!ok)throw new Error('Videos online settings में save नहीं हुए।');
+  renderFinalGalleryMedia();
+  if(status)status.textContent='✓ Videos सभी phones के लिए online save हो गए।';
+  toast('✓ Videos सभी phones पर save हो गए।');
+ }catch(e){
+  console.error('Video save failed:',e);
+  if(status)status.textContent='❌ Video save failed: '+(e?.message||'');
+  toast('❌ Videos save नहीं हुए: '+(e?.message||''));
+ }
+}
 async function saveAllGalleryMedia(){
  const status=document.getElementById('mGalleryList');
  try{
@@ -1627,7 +1658,13 @@ function bindManagementFilePickerGuard(){
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-sb.auth.getSession().then(({data})=>{if(data?.session){closeAuthPanel();openManagement(data.session.user).then(()=>{if(filePickerGuardActive())restoreManagementPanelAfterFilePicker()})}});
+sb.auth.getSession().then(({data})=>{
+  if(data?.session?.user){
+    // Existing Supabase sessions must NOT automatically open the Owner/Team panel.
+    // The panel opens only after an explicit Login/Google sign-in from this page.
+    currentAuthUser=data.session.user;
+  }
+});
 window.addEventListener('pageshow',()=>{restoreManagementPanelAfterFilePicker();setTimeout(bindManagementFileInputs,100);setTimeout(restoreManagementPanelAfterFilePicker,350)});
 window.addEventListener('focus',()=>{restoreManagementPanelAfterFilePicker();setTimeout(bindManagementFileInputs,100);setTimeout(restoreManagementPanelAfterFilePicker,350)});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){restoreManagementPanelAfterFilePicker();setTimeout(bindManagementFileInputs,100);setTimeout(restoreManagementPanelAfterFilePicker,350)}});
@@ -1635,10 +1672,18 @@ setTimeout(bindManagementFilePickerGuard,500);
 
 sb.auth.onAuthStateChange((event,session)=>{
  if(event==='SIGNED_IN'&&session?.user){
-   // Do not rebuild the Management Panel while Android's file picker is active.
-   // Rebuilding it can leave the selected file visible but detach it from the Save button.
-   if(filePickerGuardActive()){currentAuthUser=session.user;restoreManagementPanelAfterFilePicker();return}
+   currentAuthUser=session.user;
+   // Never auto-open Management for a normal page load or an existing session.
+   // Only an explicit login action may open it.
+   if(!explicitManagementLogin){return}
+   explicitManagementLogin=false;
+   if(filePickerGuardActive()){restoreManagementPanelAfterFilePicker();return}
    closeAuthPanel();openManagement(session.user);
+ }
+ if(event==='SIGNED_OUT'){
+   explicitManagementLogin=false;
+   currentAuthUser=null;
+   closeManagement();
  }
 });
 window.addEventListener('unhandledrejection',e=>{console.error('Unhandled promise:',e.reason);toast('❌ कोई online operation पूरा नहीं हुआ। फिर से Save करें।')});
