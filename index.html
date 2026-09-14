@@ -198,14 +198,18 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 .gallery-block>h3{margin:0 0 12px!important}
 .gallery-photo-frame{height:auto!important;aspect-ratio:2/3!important;margin:0 0 18px!important;border:0!important;border-radius:0!important;background:transparent!important}
 .gallery-photo-frame img{width:100%;height:100%;aspect-ratio:2/3!important;object-fit:cover}
+/* Four-photo public slider: every slide is its own 9:16 portrait frame. */
 .gallery-slider{height:auto!important;min-height:0!important}
-.gallery-track,.gallery-video-track{height:100%;display:flex;transition:transform .4s ease}
-.gallery-slide{min-width:100%;height:auto!important;aspect-ratio:2/3!important;position:relative}
-.gallery-slide img{width:100%;height:100%;aspect-ratio:2/3!important;object-fit:cover}
-.gallery-video-slide{min-width:100%;height:auto!important;min-height:0!important;position:relative;display:flex;align-items:center;justify-content:center;background:transparent}
-.gallery-video-slide video{display:block;object-fit:contain;background:#080808;max-width:100%;max-height:none;width:100%;height:auto}
-.gallery-video-slide.video-portrait video{aspect-ratio:9/16;height:auto;width:100%;object-fit:contain}
-.gallery-video-slide.video-landscape video{aspect-ratio:16/9;width:100%;height:auto;object-fit:contain}
+.gallery-track,.gallery-video-track{height:auto;display:flex;transition:transform .4s ease}
+.gallery-slide{min-width:100%;height:auto!important;aspect-ratio:9/16!important;position:relative;overflow:hidden;background:#080808}
+.gallery-slide img{width:100%;height:100%;aspect-ratio:9/16!important;object-fit:cover;display:block}
+/* Public video slider: Video 1 = 16:9, Video 2/3 = 9:16. */
+.gallery-video-slide{min-width:100%;height:auto!important;min-height:0!important;position:relative;display:flex;align-items:center;justify-content:center;background:#080808;overflow:hidden}
+.gallery-video-slide.video-landscape{aspect-ratio:16/9!important}
+.gallery-video-slide.video-portrait{aspect-ratio:9/16!important}
+.gallery-video-slide video{display:block;background:#080808;max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain}
+.gallery-video-slide.video-portrait video{aspect-ratio:9/16!important}
+.gallery-video-slide.video-landscape video{aspect-ratio:16/9!important}
 .gallery-counter{text-align:center;margin-top:10px;color:#ffd966;font-weight:800}
 .gallery-slider .slider-arrow{top:50%;z-index:5}
 .gallery-slider .slider-dots{bottom:12px}
@@ -391,6 +395,22 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 
 
 .manager-workspace .manager-card[data-access]{display:none}
+
+/* V4: requested public media frame layout */
+/* Four gallery slides: each slide has its own 9:16 portrait frame. */
+.gallery-slider[data-gallery-slider="four"] .gallery-track{display:flex!important;width:100%!important;align-items:stretch!important}
+.gallery-slider[data-gallery-slider="four"] .gallery-slide{min-width:100%!important;width:100%!important;height:auto!important;aspect-ratio:9/16!important;position:relative!important;overflow:hidden!important;background:#080808!important}
+.gallery-slider[data-gallery-slider="four"] .gallery-slide img{width:100%!important;height:100%!important;object-fit:contain!important;display:block!important}
+
+/* Videos: show all 3 frames one below another, not as one shared slider. */
+.gallery-slider[data-gallery-slider="video"]{overflow:visible!important}
+.gallery-slider[data-gallery-slider="video"] .gallery-video-track{display:block!important;width:100%!important;transform:none!important}
+.gallery-slider[data-gallery-slider="video"] .gallery-video-slide{width:100%!important;min-width:100%!important;margin:0 0 18px!important;position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#080808!important;border-radius:18px!important;overflow:hidden!important}
+.gallery-slider[data-gallery-slider="video"] .gallery-video-slide.video-landscape{aspect-ratio:16/9!important;height:auto!important}
+.gallery-slider[data-gallery-slider="video"] .gallery-video-slide.video-portrait{aspect-ratio:9/16!important;height:auto!important}
+.gallery-slider[data-gallery-slider="video"] .gallery-video-slide video{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;display:block!important}
+.gallery-slider[data-gallery-slider="video"] .slider-arrow,.gallery-slider[data-gallery-slider="video"] .slider-dots{display:none!important}
+
 </style>
 
 <style id="final-slider-ui">
@@ -501,6 +521,78 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 }
 @media(max-width:600px){.current-user-id-card{margin-top:5px}.id-card-live-wrap{border-radius:12px}.id-live-text{font-size:clamp(7px,1.45vw,13px);padding:0 .7%}.id-live-status span{font-size:clamp(7px,1.3vw,12px);padding:2px 4px}.id-live-number{border-radius:0}.id-live-number b{font-size:clamp(10px,2.35vw,22px)}.id-live-grid{grid-template-columns:1fr}.id-live-editor{padding:12px}}
 </style>
+
+<style id="final-public-media-layout-v6">
+/* EXACT PUBLIC MEDIA ORDER / RATIOS — V6
+   Requested: Gallery -> Video 1 -> Video 2 -> Video 3 -> Live Aarti -> Pandit/Team.
+   Do not turn videos into a slider; show all three one below another. */
+#public-videos .gallery-video-track{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:22px!important;
+  width:100%!important;
+  transform:none!important;
+  transition:none!important;
+}
+#public-videos .gallery-video-slide{
+  flex:0 0 auto!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  border-radius:20px!important;
+  overflow:hidden!important;
+}
+#public-videos .gallery-video-slide.video-landscape{
+  aspect-ratio:16/9!important;
+  height:auto!important;
+}
+#public-videos .gallery-video-slide.video-portrait{
+  aspect-ratio:9/16!important;
+  height:auto!important;
+}
+#public-videos .gallery-video-slide video{
+  width:100%!important;
+  height:100%!important;
+  aspect-ratio:auto!important;
+  object-fit:contain!important;
+  display:block!important;
+}
+#public-videos .gallery-slider,
+#public-videos .gallery-video-frame{
+  height:auto!important;
+  overflow:visible!important;
+}
+#public-videos .slider-arrow,
+#public-videos .slider-dots{
+  display:none!important;
+}
+
+/* EXACT 4-SLIDE GALLERY: each slide is a separate 9:16 frame. */
+#gallery [data-gallery-slider="four"] .gallery-track{
+  display:flex!important;
+  flex-direction:row!important;
+  width:100%!important;
+  transform:translateX(0)!important;
+  transition:transform .4s ease!important;
+}
+#gallery [data-gallery-slider="four"] .gallery-slide{
+  flex:0 0 100%!important;
+  width:100%!important;
+  min-width:100%!important;
+  height:auto!important;
+  aspect-ratio:9/16!important;
+  border-radius:20px!important;
+  overflow:hidden!important;
+}
+#gallery [data-gallery-slider="four"] .gallery-slide img{
+  width:100%!important;
+  height:100%!important;
+  aspect-ratio:auto!important;
+  object-fit:cover!important;
+  display:block!important;
+}
+</style>
+
 </head>
 <body>
 <header><div class="nav">
@@ -608,6 +700,11 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
         <div class="gallery-photo-frame"><img id="gallerySingle" alt="विशेष उत्सव फोटो"></div>
       </div>
 
+    </div>
+  </div>
+</section>
+<section id="public-videos" class="section">
+  <div class="container">
       <div class="gallery-block">
         <div class="gallery-slider" data-gallery-slider="video">
           <div class="gallery-video-track" id="videoGalleryTrack">
@@ -620,7 +717,6 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
           <div class="slider-dots" id="videoDots"></div>
         </div>
       </div>
-    </div>
   </div>
 </section>
 
