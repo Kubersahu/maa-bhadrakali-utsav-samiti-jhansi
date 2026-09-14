@@ -230,7 +230,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
   .lower-banner-slider{height:auto!important}
   .lower-banner-slider .banner-slide img{height:100%!important}
   .gallery-photo-frame{height:auto!important;aspect-ratio:2/3!important}
-  .gallery-slider{height:300px!important}
+  .gallery-slider{height:auto!important}
   .media-admin-grid,.permission-grid{grid-template-columns:1fr}
   .banner-manager-card{grid-column:auto}
 }
@@ -594,28 +594,32 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 </style>
 
 <style id="gallery-four-fix">
-/* ===== FIXED 4-PHOTO SLIDER (9:16) ===== */
+/* One photo at a time. 9:16 frame. No stacking. */
 #gallery .gallery-slider[data-gallery-slider="four"]{
   width:100%!important;
   max-width:100%!important;
+  height:auto!important;
   overflow:hidden!important;
   position:relative!important;
   border-radius:18px!important;
   background:#080808!important;
 }
 #gallery .gallery-slider[data-gallery-slider="four"] .gallery-track{
-  display:flex!important;
-  flex-direction:row!important;
-  flex-wrap:nowrap!important;
+  display:block!important;
   width:100%!important;
-  transition:transform .4s ease!important;
-  will-change:transform;
+  height:auto!important;
+  transform:none!important;
+  gap:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  flex-wrap:unset!important;
 }
 #gallery .gallery-slider[data-gallery-slider="four"] .gallery-slide{
-  flex:0 0 100%!important;
+  display:none!important;
   width:100%!important;
-  min-width:100%!important;
+  min-width:0!important;
   max-width:100%!important;
+  flex:none!important;
   height:auto!important;
   aspect-ratio:9/16!important;
   position:relative!important;
@@ -624,9 +628,12 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
   border-radius:18px!important;
   box-sizing:border-box!important;
 }
+#gallery .gallery-slider[data-gallery-slider="four"] .gallery-slide.is-current{
+  display:block!important;
+}
 #gallery .gallery-slider[data-gallery-slider="four"] .gallery-slide img{
-  position:absolute!important;
-  inset:0!important;
+  position:static!important;
+  inset:auto!important;
   width:100%!important;
   height:100%!important;
   object-fit:cover!important;
@@ -634,11 +641,8 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
   display:block!important;
   border-radius:18px!important;
 }
-#gallery .gallery-slider[data-gallery-slider="four"] .gallery-slide img[src=""],
-#gallery .gallery-slider[data-gallery-slider="four"] .gallery-slide img:not([src]){
-  display:none!important;
-}
 @media(max-width:700px){
+  #gallery .gallery-slider[data-gallery-slider="four"],
   #gallery .gallery-slider[data-gallery-slider="four"] .gallery-slide{
     height:auto!important;
     aspect-ratio:9/16!important;
@@ -1165,59 +1169,41 @@ function renderFinalStoredBanners(){
 }
 
 /* ===== GALLERY ===== */
-function getGallerySlides(kind){
-  const track=document.getElementById(kind==='four'?'fourGalleryTrack':'videoGalleryTrack');
+function getFourActiveSlides(){
+  const track=document.getElementById('fourGalleryTrack');
   if(!track)return [];
-  if(kind==='four'){
-    return [...track.querySelectorAll('.gallery-slide')].filter(s=>s.dataset.hasImage==='1' || (s.querySelector('img')&&s.querySelector('img').src&&!s.querySelector('img').src.endsWith(location.pathname)));
-  }
-  return [...track.querySelectorAll('.gallery-video-slide')].filter(s=>{
-    const v=s.querySelector('video');return v&&v.src;
-  });
+  return [...track.querySelectorAll('.gallery-slide')].filter(s=>s.dataset.hasImage==='1');
 }
 function renderFinalGallery(kind){
-  const track=document.getElementById(kind==='four'?'fourGalleryTrack':'videoGalleryTrack');
-  if(!track)return;
-  const allSlides=[...track.querySelectorAll(kind==='four'?'.gallery-slide':'.gallery-video-slide')];
-  // For four-photo slider: only keep slides that have images in the flow
-  let active=[];
-  if(kind==='four'){
-    active=allSlides.filter(s=>s.dataset.hasImage==='1');
-    // If dataset not set yet, fall back to img src check
-    if(!active.length){
-      active=allSlides.filter(s=>{const img=s.querySelector('img');return img&&img.getAttribute('src')&&img.getAttribute('src').length>5});
-    }
-    // Hide empty, show active
-    allSlides.forEach(s=>{
-      const has=active.includes(s);
-      s.style.display=has?'block':'none';
-      if(has){s.style.flex='0 0 100%';s.style.minWidth='100%';s.style.width='100%'}
-    });
-  }else{
-    active=allSlides;
-    allSlides.forEach(s=>{s.style.flex='0 0 100%';s.style.minWidth='100%';s.style.width='100%'});
+  if(kind!=='four'){
+    const vTrack=document.getElementById('videoGalleryTrack');
+    if(vTrack)vTrack.style.transform='none';
+    return;
   }
-  const count=Math.max(1, active.length);
-  if(finalSliderState[kind]>=count) finalSliderState[kind]=0;
-  // Translate based on index among visible slides only
-  // Because empty slides are display:none, we need to translate by index * 100% of visible ones
-  // Simpler approach: rebuild order - put active slides first by using transform on visible count
-  track.style.transform=`translateX(-${finalSliderState[kind]*100}%)`;
-  finalDots(kind==='four'?'fourDots':'videoDots', count, finalSliderState[kind], i=>{
-    finalSliderState[kind]=i;
-    renderFinalGallery(kind);
+  const track=document.getElementById('fourGalleryTrack');
+  if(!track)return;
+  const all=[...track.querySelectorAll('.gallery-slide')];
+  const active=all.filter(s=>s.dataset.hasImage==='1');
+  all.forEach(s=>s.classList.remove('is-current'));
+  track.style.transform='none';
+  if(!active.length){
+    finalDots('fourDots',0,0,()=>{});
+    return;
+  }
+  if(finalSliderState.four>=active.length)finalSliderState.four=0;
+  if(finalSliderState.four<0)finalSliderState.four=active.length-1;
+  active[finalSliderState.four].classList.add('is-current');
+  finalDots('fourDots',active.length,finalSliderState.four,i=>{
+    finalSliderState.four=i;
+    renderFinalGallery('four');
   });
 }
 function galleryMove(kind,dir){
-  const track=document.getElementById(kind==='four'?'fourGalleryTrack':'videoGalleryTrack');
-  if(!track)return;
-  let count=kind==='four'?4:3;
-  if(kind==='four'){
-    const active=[...track.querySelectorAll('.gallery-slide')].filter(s=>s.style.display!=='none' && s.dataset.hasImage!=='0');
-    count=Math.max(1, active.length || 1);
-  }
-  finalSliderState[kind]=(finalSliderState[kind]+dir+count)%count;
-  renderFinalGallery(kind);
+  if(kind!=='four')return;
+  const n=getFourActiveSlides().length;
+  if(n<2)return;
+  finalSliderState.four=(finalSliderState.four+dir+n)%n;
+  renderFinalGallery('four');
 }
 function swipe(el,fn){if(!el)return;let sx=0,sy=0;el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy))fn(dx<0?1:-1)},{passive:true})}
 function requireAuthenticated(){if(!currentAuthUser){toast('❌ पहले Owner/Team Login करें।');return false}return true}
@@ -1308,25 +1294,20 @@ function renderFinalGalleryMedia(){
  for(let i=1;i<=4;i++){
   const e=document.getElementById('gallery4_'+i);
   const slide=e?e.closest('.gallery-slide'):null;
-  if(e){
-    if(d['s'+i]){
-      e.src=d['s'+i];e.style.display='block';e.style.opacity='1';
-      if(slide){slide.style.display='block';slide.dataset.hasImage='1'}
-    }else{
-      e.removeAttribute('src');e.style.display='none';e.style.opacity='0';
-      if(slide){slide.style.display='none';slide.dataset.hasImage='0'}
-    }
+  if(!e||!slide)continue;
+  slide.classList.remove('is-current');
+  if(d['s'+i]){
+    e.src=d['s'+i];
+    e.style.display='block';
+    slide.dataset.hasImage='1';
+  }else{
+    e.removeAttribute('src');
+    e.style.display='none';
+    slide.dataset.hasImage='0';
   }
-}
- // Reset slider index if current slide became empty
- try{
-   const track=document.getElementById('fourGalleryTrack');
-   if(track){
-     const visible=[...track.querySelectorAll('.gallery-slide')].filter(s=>s.dataset.hasImage==='1');
-     if(visible.length && finalSliderState.four>=visible.length) finalSliderState.four=0;
-     renderFinalGallery('four');
-   }
- }catch(err){}
+ }
+ finalSliderState.four=0;
+ renderFinalGallery('four');
  const se=document.getElementById('gallerySingle');if(se){se.src=d.single||'';se.style.display=d.single?'block':'none'}
  const sc=document.getElementById('gallerySingleCap');if(sc)sc.textContent=d.singleCap||'विशेष उत्सव फोटो';
  for(let i=1;i<=3;i++){const v=document.getElementById('galleryVideo'+i);if(v){if(d['v'+i]){if(v.src!==d['v'+i]){v.src=d['v'+i];v.load()}v.style.display='block'}else{v.removeAttribute('src');v.style.display='none'}}}
