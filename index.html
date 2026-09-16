@@ -38,7 +38,7 @@
 body{font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at 50% 0%,#3b0b12 0,#100507 35%,#050505 70%);color:var(--white);overflow-x:hidden}
 body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,#ffd45c 1px,transparent 1.5px),radial-gradient(circle,#e32635 1px,transparent 1.5px);background-size:95px 95px,140px 140px;background-position:10px 20px,50px 80px;opacity:.15;animation:particles 18s linear infinite}
 @keyframes particles{from{transform:translateY(0)}to{transform:translateY(-180px)}}
-header{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(3,3,3,.82);backdrop-filter:blur(14px);border-bottom:1px solid #d6a72c30}
+header{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(3,3,3,.92);backdrop-filter:blur(14px);border-bottom:1px solid #d6a72c30}
 .nav{max-width:1200px;margin:auto;height:72px;padding:0 22px;display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:10px;font-weight:bold;color:var(--gold2);letter-spacing:1px}
 .logo-icon{width:43px;height:43px;border-radius:50%;display:grid;place-items:center;font-size:25px;background:linear-gradient(145deg,#32080d,#080808);border:1px solid var(--gold);box-shadow:0 0 18px #d6a72c40}
@@ -71,8 +71,29 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 
 
 /* TOP LOGIN BUTTON + SEPARATE AUTH PANEL */
-.top-login-btn{position:fixed;top:84px;right:20px;z-index:500;padding:12px 20px;border:1px solid #ffe58a;border-radius:12px;background:linear-gradient(135deg,#ffd966,#e0aa20);color:#160b00;font-weight:800;cursor:pointer;box-shadow:0 8px 25px #0008,0 0 20px #d6a72c55;transition:.3s}
+.header-login-row{
+  display:flex;justify-content:flex-end;align-items:center;
+  padding:0 18px 10px;max-width:1200px;margin:0 auto;width:100%;
+}
+.top-login-btn{
+  position:relative;top:auto;right:auto;z-index:500;
+  padding:11px 18px;border:1px solid #ffe58a;border-radius:12px;
+  background:linear-gradient(135deg,#ffd966,#e0aa20);color:#160b00;
+  font-weight:800;cursor:pointer;
+  box-shadow:0 8px 25px #0008,0 0 20px #d6a72c55;transition:.3s;
+}
 .top-login-btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 10px 30px #0009,0 0 28px #ffd96677}
+/* Scroll down → login sticks to top */
+.top-login-btn.is-sticky{
+  position:fixed!important;
+  top:12px!important;
+  right:14px!important;
+  z-index:600!important;
+  margin:0!important;
+  box-shadow:0 10px 30px #000a,0 0 24px #d6a72c66!important;
+}
+.header-login-row.is-sticky-spacer{min-height:48px}
+#loginScrollSentinel{height:1px;width:100%;pointer-events:none}
 #authPanel{position:fixed;inset:0;z-index:1100;display:none;align-items:flex-start;justify-content:center;padding:105px 18px 30px;background:#000000b8;backdrop-filter:blur(12px);overflow-y:auto}
 #authPanel.open{display:flex;animation:panelIn .25s ease}
 .auth-box{width:min(460px,100%);padding:28px;border-radius:22px;background:linear-gradient(145deg,#ffd966,#e8b62d);color:#090909;border:2px solid #fff0a8;box-shadow:0 25px 80px #000b;position:relative}
@@ -81,7 +102,12 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 .auth-box .field label{color:#2a1b00}.auth-box .field input,.auth-box .field select{color:#fff;background:#130c0d;border:1px solid #0005}.auth-action{width:100%;margin-top:5px;padding:14px;border:0;border-radius:11px;background:#160b00;color:#ffd966;font-weight:800;cursor:pointer}.google-auth-btn{width:100%;margin-top:10px;padding:13px;border:1px solid #3c2a08;border-radius:11px;background:#fff;color:#161616;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px}.google-auth-btn:hover{filter:brightness(.97)}.auth-divider{display:flex;align-items:center;gap:10px;margin:12px 0 2px;color:#4a3508;font-size:12px;font-weight:800}.auth-divider:before,.auth-divider:after{content:"";height:1px;background:#5d410055;flex:1}.auth-note{margin-top:12px;font-size:12px;line-height:1.6;color:#3c2a08}.signup-fields{display:none}.signup-fields.show{display:block}
 .id-card-template{width:100%;aspect-ratio:3/4;background-size:cover;background-position:center}
 .id-card-value{color:#111 !important;text-shadow:none !important}
-@media(max-width:600px){.top-login-btn{top:78px;right:12px;padding:10px 15px;font-size:12px}.auth-box{padding:22px}.auth-head h2{font-size:23px}}
+@media(max-width:600px){
+  .header-login-row{padding:0 12px 8px}
+  .top-login-btn{padding:10px 14px;font-size:12px}
+  .top-login-btn.is-sticky{top:10px!important;right:10px!important}
+  .auth-box{padding:22px}.auth-head h2{font-size:23px}
+}
 #managementPanel{
  position:fixed;inset:0;z-index:1000;display:none;overflow-y:auto;
  background:linear-gradient(135deg,#ffd966,#f1c232 48%,#e6b72d);
@@ -167,7 +193,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 .owner-textarea{min-height:130px;resize:vertical}
 .auth-box{width:min(650px,calc(100vw - 24px));padding:32px;border-radius:24px}.auth-box .field{margin-bottom:16px}.auth-box .field label{display:block;margin-bottom:8px;font-size:16px;font-weight:800}.auth-box .field input,.auth-box .field select{display:block;width:100%;height:54px;padding:13px 15px;border-radius:12px;font-size:16px}
 .contact-form{display:grid;grid-template-columns:1fr 1fr;gap:16px}.contact-form .full{grid-column:1/-1}.contact-form input,.contact-form textarea{width:100%;padding:16px;border-radius:12px;border:1px solid #8a6d2b;font-size:16px}.contact-form textarea{min-height:150px}
-@media(max-width:700px){.media-admin-grid,.contact-form{grid-template-columns:1fr}.hero-banner-slider{min-height:270px}.banner-slide img{min-height:270px}.lower-banner-slider{min-height:210px}.lower-banner-slider .banner-slide img{min-height:210px}.gallery-photo-frame{height:auto;aspect-ratio:2/3}.gallery-slide,.gallery-video-slide{height:auto}.auth-box{padding:24px 20px}.auth-box .field input,.auth-box .field select{height:54px}.slider-arrow{width:38px;height:38px;font-size:18px}}
+@media(max-width:700px){.media-admin-grid,.contact-form{grid-template-columns:1fr}.hero-banner-slider{min-height:0}.banner-slide img{min-height:0}.lower-banner-slider{min-height:0}.lower-banner-slider .banner-slide img{min-height:0}.gallery-photo-frame{height:auto;aspect-ratio:2/3}.gallery-slide,.gallery-video-slide{height:auto}.auth-box{padding:24px 20px}.auth-box .field input,.auth-box .field select{height:54px}.slider-arrow{width:38px;height:38px;font-size:18px}}
 
 
 /* Form layout safety */
@@ -181,7 +207,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 
 
 /* === CORRECTED LAYOUT === */
-.hero{display:block!important;padding-top:34px!important}
+.hero{display:block!important;padding-top:120px!important}
 .hero-wrap{width:min(1180px,calc(100% - 32px));margin:auto}
 .hero-banner-slider{width:100%!important;aspect-ratio:16/9!important;height:auto!important;min-height:0!important;margin:0 auto 24px!important}
 .hero-banner-slider .banner-slide{aspect-ratio:16/9!important;height:auto!important}
@@ -678,11 +704,16 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 </style>
 </head>
 <body>
-<header><div class="nav">
+<header id="siteHeader">
+<div class="nav">
 <div class="logo"><div class="logo-icon"><img id="headerLogoImg" alt="समिति Logo"></div>MAA BHADRAKALI UTSAV SAMITI JHANSI</div>
 <nav><a href="#home">Home</a><a href="#about">परिचय</a><a href="#utsav">उत्सव</a><a href="#schedule">आरती समय</a><a href="#gallery">Gallery</a><a href="#team">समिति</a><a href="#donate">प्रसाद/सहयोग</a><a href="#contact">Contact</a></nav>
-</div></header>
-<button class="top-login-btn" onclick="openAuthPanel()">🔐 Login / Signup</button>
+</div>
+<div class="header-login-row" id="headerLoginRow">
+  <button type="button" class="top-login-btn" id="topLoginBtn" onclick="openAuthPanel()">🔐 Login / Signup</button>
+</div>
+</header>
+<div id="loginScrollSentinel" aria-hidden="true"></div>
 
 
 <section class="hero" id="home">
@@ -2076,6 +2107,30 @@ async function loadFeedbackMessages(){
 
 /* ===== VIDEO AUTO PLAY / PAUSE ON VISIBILITY ===== */
 let videoObserver=null;
+
+/* ===== LOGIN STICKY ON SCROLL ===== */
+function setupLoginSticky(){
+  const btn=document.getElementById('topLoginBtn');
+  const row=document.getElementById('headerLoginRow');
+  if(!btn||!row)return;
+  const onScroll=()=>{
+    // After scrolling past header area, pin login to top-right
+    const threshold=Math.max(60, (document.getElementById('siteHeader')?.offsetHeight||90)-20);
+    if(window.scrollY>threshold){
+      if(!btn.classList.contains('is-sticky')){
+        btn.classList.add('is-sticky');
+        row.classList.add('is-sticky-spacer');
+      }
+    }else{
+      btn.classList.remove('is-sticky');
+      row.classList.remove('is-sticky-spacer');
+    }
+  };
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onScroll,{passive:true});
+  onScroll();
+}
+
 function setupVideoAutoplay(){
   const videos=[...document.querySelectorAll('#public-videos video, #videoGalleryTrack video')].filter(v=>v && (v.src||v.querySelector('source')));
   const allVideos=[...document.querySelectorAll('#public-videos video, #videoGalleryTrack video')];
@@ -2184,6 +2239,7 @@ async function init(){
  swipe(document.querySelector('[data-gallery-slider="video"]'),d=>galleryMove('video',d));
  setInterval(()=>bannerMove('hero',1),4500);setInterval(()=>bannerMove('lower',1),4500);setInterval(()=>galleryMove('four',1),4000);
  setTimeout(setupVideoAutoplay,800);
+ setupLoginSticky();
  renderPublicMap();
  renderDonateVisibility();
 }
@@ -2345,56 +2401,78 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important}
 
 
 <style id="banner-no-crop-fix">
-/* Banners: full image visible, no cut on phone or desktop */
+/* Reliable 16:9 banners — always visible, full image, no crop */
 .hero-banner-slider,
 .lower-banner-slider{
+  position:relative!important;
   width:100%!important;
   max-width:100vw!important;
-  height:auto!important;
+  height:0!important;
   min-height:0!important;
-  aspect-ratio:16/9!important;
+  padding-top:56.25%!important; /* 16:9 */
+  aspect-ratio:auto!important;
   overflow:hidden!important;
   background:#120608!important;
+  border-radius:0!important;
 }
 .hero-banner-slider .banner-track,
 .lower-banner-slider .banner-track{
+  position:absolute!important;
+  inset:0!important;
+  display:flex!important;
   height:100%!important;
-  align-items:stretch!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  transition:transform .45s ease!important;
 }
 .hero-banner-slider .banner-slide,
 .lower-banner-slider .banner-slide{
+  position:relative!important;
+  flex:0 0 100%!important;
   min-width:100%!important;
   width:100%!important;
-  height:auto!important;
+  height:100%!important;
   min-height:0!important;
-  aspect-ratio:16/9!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
+  aspect-ratio:auto!important;
+  display:block!important;
   background:#120608!important;
 }
 .hero-banner-slider .banner-slide img,
 .lower-banner-slider .banner-slide img{
+  position:absolute!important;
+  inset:0!important;
   width:100%!important;
   height:100%!important;
   min-height:0!important;
-  max-height:100%!important;
+  max-height:none!important;
   object-fit:contain!important;
   object-position:center center!important;
   display:block!important;
+  margin:0!important;
+  padding:0!important;
+  aspect-ratio:auto!important;
+}
+/* dots stay on top of banner */
+.hero-banner-slider .slider-dots,
+.lower-banner-slider .slider-dots{
+  position:absolute!important;
+  bottom:10px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  z-index:5!important;
 }
 @media(max-width:700px){
   .hero-banner-slider,
   .lower-banner-slider{
-    height:auto!important;
+    height:0!important;
     min-height:0!important;
-    aspect-ratio:16/9!important;
+    padding-top:56.25%!important;
   }
   .hero-banner-slider .banner-slide img,
   .lower-banner-slider .banner-slide img{
-    height:100%!important;
-    min-height:0!important;
     object-fit:contain!important;
+    min-height:0!important;
   }
 }
 </style>
