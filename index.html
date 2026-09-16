@@ -981,7 +981,13 @@ async function topSignup(){
  if(pass.length<6){if(msg)msg.textContent='❌ Password कम से कम 6 characters का रखें।';return}
  const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name,date_of_birth:dob,phone:phone}}});
  if(error){if(msg)msg.textContent='❌ '+error.message;return}
- if(msg)msg.textContent=data.session?'✓ Account created.':'✓ Signup हो गया। Owner approval के बाद access मिलेगा।';
+ // Profile row must exist so Owner sees New Registration Request
+ try{
+  const user=data?.user||data?.session?.user;
+  if(user){await ensureUserProfile(user);}
+  else if(data?.session){await ensureUserProfile(data.session.user);}
+ }catch(e){console.warn('signup profile',e)}
+ if(msg)msg.textContent=data.session?'✓ Account created. Owner approval के बाद management access मिलेगा।':'✓ Signup हो गया। Email confirm / Login के बाद Owner को request दिखेगी।';
 }
 
 async function openManagement(user){
@@ -1366,7 +1372,27 @@ async function saveTeamV3(){
   renderTeamV3();toast('✓ Team Member की photo/details save हो गईं। सभी phones पर दिखेंगी।');
  }catch(e){console.error(e);toast('❌ Team save नहीं हुआ: '+(e?.message||'Supabase Storage/RLS check करें।'))}
 }
-function renderTeamV3(){const pub=document.getElementById('publicTeamGrid');if(!pub)return;pub.innerHTML='';const arr=settings.teamMembers||finalGet('mbus_team_v3',[]);arr.filter(x=>x.name||x.photo).forEach(x=>{const c=document.createElement('div');c.className='card person-card';c.innerHTML='<div class="photo-frame">'+(x.photo?'<img alt="Team Member">':'<div class="photo-placeholder">👤</div>')+'</div><h3></h3><p></p>';if(x.photo)c.querySelector('img').src=x.photo;c.querySelector('h3').textContent=x.name||'Team Member';c.querySelector('p').textContent=(x.role||'समिति सदस्य')+(x.details?' • '+x.details:'');pub.appendChild(c)})}
+function renderTeamV3(){
+ const pub=document.getElementById('publicTeamGrid');if(!pub)return;pub.innerHTML='';
+ const arr=settings.teamMembers||finalGet('mbus_team_v3',[]);
+ // Only show members Owner explicitly added/saved in Team Members panel.
+ // Hide auto-approved junk (no photo + details = "Owner approved team member").
+ arr.filter(x=>{
+   if(!x||!(x.name||x.photo))return false;
+   const auto=String(x.details||'').includes('Owner approved team member');
+   if(auto&&!x.photo)return false; // skip empty auto frames
+   return true;
+ }).forEach(x=>{
+   const c=document.createElement('div');c.className='card person-card';
+   c.innerHTML='<div class="photo-frame">'+(x.photo?'<img alt="Team Member">':'<div class="photo-placeholder">👤</div>')+'</div><h3></h3><p></p>';
+   if(x.photo)c.querySelector('img').src=x.photo;
+   c.querySelector('h3').textContent=x.name||'Team Member';
+   const det=String(x.details||'');
+   const cleanDet=det.includes('Owner approved team member')?'':det;
+   c.querySelector('p').textContent=(x.role||'समिति सदस्य')+(cleanDet?' • '+cleanDet:'');
+   pub.appendChild(c);
+ });
+}
 function restoreV3(){const c=settings.committee||finalGet('mbus_committee_v3',null);if(c){document.getElementById('mPandit')&&(document.getElementById('mPandit').value=c.pandit||'');document.getElementById('mPresident')&&(document.getElementById('mPresident').value=c.president||'');document.getElementById('mTreasurer')&&(document.getElementById('mTreasurer').value=c.treasurer||'');if(c.panditPhoto)document.getElementById('panditPhoto').src=c.panditPhoto;if(c.presidentPhoto)document.getElementById('presidentPhoto').src=c.presidentPhoto;if(c.treasurerPhoto)document.getElementById('treasurerPhoto').src=c.treasurerPhoto}const t=settings.teamMembers||finalGet('mbus_team_v3',[]);const wrap=document.getElementById('teamManagerList');if(wrap&&!wrap.children.length)t.forEach(x=>addTeamManagerRow(x));renderTeamV3()}
 function saveAccessControl(){toast('👑 Owner Email fixed है: '+OWNER_EMAIL+' । Individual permissions Registered Users में set करें।')}
 function normalizePerms(p){const out={};ACCESS_KEYS.forEach(k=>out[k]=!!(p&&p[k]));return out}
@@ -1416,8 +1442,17 @@ function buildUserIdCard(u, controls=false){
  const perms=normalizePerms(u.permissions),created=u.created_at?new Date(u.created_at).toLocaleString('hi-IN',{dateStyle:'medium',timeStyle:'short'}):'—',idNo=u.team_id||makeTeamId((u.id||'')+(u.email||''));
  const photo=u.avatar_url?`<img class="user-id-avatar" src="${String(u.avatar_url).replace(/"/g,'&quot;')}" alt="Profile">`:'<div class="user-id-placeholder">👤</div>';
  const status=u.status||'pending';const card=document.createElement('div');card.className='user-id-card';
- card.innerHTML=`<div class="user-id-head">${photo}<div class="user-id-meta"><h4>${escapeHtml(u.full_name||'New User')}</h4><small>📧 ${escapeHtml(u.email||'—')}</small><small>📱 ${escapeHtml(u.phone||'—')}</small><small>🎂 ${escapeHtml(u.dob||'—')}</small><small>🗓️ Signup: ${escapeHtml(created)}</small><span class="user-id-number">ID: ${idNo}</span></div></div><div class="user-id-status ${status}">Status: ${status==='approved'?'✅ Approved':status==='rejected'?'❌ Rejected':'🟡 Pending Approval'}</div>${controls?`<b>Owner की Permission:</b><div class="user-id-perms">${ACCESS_KEYS.map(k=>`<label><input type="checkbox" data-user-perm="${k}" ${perms[k]?'checked':''}> ${escapeHtml(permLabel(k))}</label>`).join('')}</div><div class="user-id-actions"><button type="button" data-user-action="approve">✅ Approve + Save Permissions</button><button type="button" data-user-action="reject">❌ Reject</button></div>`:`<div class="user-id-view-perms"><b>Assigned:</b> ${ACCESS_KEYS.filter(k=>perms[k]).map(k=>escapeHtml(permLabel(k))).join(' • ')||'No management access assigned'}</div>`}`;
- if(controls){card.querySelector('[data-user-action="approve"]').onclick=()=>updateUserApproval(u.id,'approved',card);card.querySelector('[data-user-action="reject"]').onclick=()=>updateUserApproval(u.id,'rejected',card)}
+ const statusLabel=status==='approved'?'✅ Approved':status==='rejected'?'❌ Rejected':'🟡 Pending Approval';
+ const actionHtml=controls?`<b>Owner की Permission:</b><div class="user-id-perms">${ACCESS_KEYS.map(k=>`<label><input type="checkbox" data-user-perm="${k}" ${perms[k]?'checked':''}> ${escapeHtml(permLabel(k))}</label>`).join('')}</div><div class="user-id-actions"><button type="button" data-user-action="approve">✅ Approve / Update Permissions</button><button type="button" data-user-action="reject">❌ Reject</button><button type="button" data-user-action="pending" style="background:#8a5a00">🟡 Set Pending</button></div>`:`<div class="user-id-view-perms"><b>Assigned:</b> ${ACCESS_KEYS.filter(k=>perms[k]).map(k=>escapeHtml(permLabel(k))).join(' • ')||'No management access assigned'}</div>`;
+ card.innerHTML=`<div class="user-id-head">${photo}<div class="user-id-meta"><h4>${escapeHtml(u.full_name||'New User')}</h4><small>📧 ${escapeHtml(u.email||'—')}</small><small>📱 ${escapeHtml(u.phone||'—')}</small><small>🎂 ${escapeHtml(u.dob||'—')}</small><small>🗓️ Signup: ${escapeHtml(created)}</small><span class="user-id-number">ID: ${idNo}</span></div></div><div class="user-id-status ${status}">Status: ${statusLabel}</div>${actionHtml}`;
+ if(controls){
+  const a=card.querySelector('[data-user-action="approve"]');
+  const r=card.querySelector('[data-user-action="reject"]');
+  const p=card.querySelector('[data-user-action="pending"]');
+  if(a)a.onclick=()=>updateUserApproval(u.id,'approved',card);
+  if(r)r.onclick=()=>updateUserApproval(u.id,'rejected',card);
+  if(p)p.onclick=()=>updateUserApproval(u.id,'pending',card);
+ }
  return card;
 }
 async function loadRegisteredUsers(){
@@ -1435,8 +1470,14 @@ async function loadRegisteredUsers(){
   if(error)throw error;
   if(viewBox)viewBox.innerHTML='';if(reqBox)reqBox.innerHTML='';
   if(!data?.length){if(viewBox)viewBox.innerHTML='<div class="user-id-empty">अभी कोई registered user नहीं मिला।</div>';if(reqBox)reqBox.innerHTML='<div class="user-id-empty">अभी कोई new registration request नहीं है।</div>';loadApprovedTeamMembers();return}
-  data.forEach(u=>{if(viewBox)viewBox.appendChild(buildUserIdCard(u,false));if(reqBox&&((u.status||'pending')==='pending'))reqBox.appendChild(buildUserIdCard(u,true));});
-  if(reqBox&&!reqBox.children.length)reqBox.innerHTML='<div class="user-id-empty">अभी कोई pending registration request नहीं है।</div>';
+  data.forEach(u=>{
+    // Registration ID View: all users, with controls so status can be changed anytime
+    if(viewBox)viewBox.appendChild(buildUserIdCard(u,true));
+    // New requests: pending + rejected (so Owner can re-approve after mistake)
+    const st=u.status||'pending';
+    if(reqBox&&(st==='pending'||st==='rejected'))reqBox.appendChild(buildUserIdCard(u,true));
+  });
+  if(reqBox&&!reqBox.children.length)reqBox.innerHTML='<div class="user-id-empty">अभी कोई pending / rejected registration request नहीं है।</div>';
   loadApprovedTeamMembers();
  }catch(e){
   console.error(e);
@@ -1477,14 +1518,33 @@ async function loadApprovedTeamMembers(){
 function escapeHtml(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function permLabel(k){return MENU_ITEMS[k]||k}
 async function updateUserApproval(id,status,card){
- const permissions=defaultMemberPermissions();card.querySelectorAll('[data-user-perm]').forEach(cb=>permissions[cb.dataset.userPerm]=!!cb.checked);
+ // Only management access — NEVER auto-add to public Team Members section
+ const permissions=defaultMemberPermissions();
+ if(card)card.querySelectorAll('[data-user-perm]').forEach(cb=>permissions[cb.dataset.userPerm]=!!cb.checked);
  try{
   const {data:userRow,error}=await sb.from('user_profiles').select('*').eq('id',id).maybeSingle();if(error)throw error;
-  const {error:upErr}=await sb.from('user_profiles').update({status,permissions}).eq('id',id);if(upErr)throw upErr;
-  if(status==='approved'&&userRow){
-   const arr=[...(settings.teamMembers||[])];const email=(userRow.email||'').trim().toLowerCase();const idx=arr.findIndex(x=>(x.email||'').trim().toLowerCase()===email);const teamId=userRow.team_id||makeTeamId((userRow.id||'')+email);await sb.from('user_profiles').update({team_id:teamId}).eq('id',userRow.id);const existingMember=arr.find(x=>(x.email||'').trim().toLowerCase()===email);const member={name:userRow.full_name||'Team Member',role:existingMember?.role||'Team Member',email,phone:userRow.phone||'',teamId,details:existingMember?.details||'Owner approved team member',photo:existingMember?.photo||userRow.avatar_url||'',permissions};if(idx>=0)arr[idx]={...arr[idx],...member};else arr.push(member);settings.teamMembers=arr;finalStore('mbus_team_v3',arr);await saveRemoteExtras('teamMembers',arr);
-  }else if(status==='rejected'&&userRow){const email=(userRow.email||'').trim().toLowerCase();const arr=(settings.teamMembers||[]).filter(x=>(x.email||'').trim().toLowerCase()!==email);settings.teamMembers=arr;finalStore('mbus_team_v3',arr);await saveRemoteExtras('teamMembers',arr);}
-  toast(status==='approved'?'✓ User approve हो गया, Team Member बन गया और permissions save हो गईं।':'✓ User reject हो गया और Team access हटा दिया गया।');loadRegisteredUsers();
+  const teamId=(userRow&&userRow.team_id)||makeTeamId((id||'')+((userRow&&userRow.email)||''));
+  const {error:upErr}=await sb.from('user_profiles').update({status,permissions,team_id:teamId}).eq('id',id);if(upErr)throw upErr;
+  // Remove any auto-added public cards that were created by older code
+  if(userRow&&userRow.email){
+   const email=(userRow.email||'').trim().toLowerCase();
+   let arr=[...(settings.teamMembers||finalGet('mbus_team_v3',[]))];
+   const before=arr.length;
+   // drop auto entries that only say "Owner approved team member" and match this email
+   arr=arr.filter(x=>{
+     const same=(x.email||'').trim().toLowerCase()===email;
+     const auto=String(x.details||'').includes('Owner approved team member');
+     return !(same&&auto);
+   });
+   if(arr.length!==before){
+     settings.teamMembers=arr;finalStore('mbus_team_v3',arr);
+     await saveRemoteExtras('teamMembers',arr);
+     renderTeamV3();
+   }
+  }
+  toast(status==='approved'?'✓ Approve हो गया। Management access मिल गया (public Team section में auto photo नहीं लगेगी)।':'✓ Reject हो गया। Management access हटा दिया गया।');
+  loadRegisteredUsers();
+  loadApprovedTeamMembers();
  }catch(e){console.error(e);toast('❌ User permission save नहीं हुई। RLS/SQL check करें।')}
 }
 async function applyManagementAccess(user){
@@ -2008,9 +2068,11 @@ window.addEventListener('focus',()=>{restoreManagementPanelAfterFilePicker();set
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){restoreManagementPanelAfterFilePicker();setTimeout(bindManagementFileInputs,100);setTimeout(restoreManagementPanelAfterFilePicker,350)}});
 setTimeout(bindManagementFilePickerGuard,500);
 
-sb.auth.onAuthStateChange((event,session)=>{
+sb.auth.onAuthStateChange(async (event,session)=>{
  if(event==='SIGNED_IN'&&session?.user){
    currentAuthUser=session.user;
+   // Always create/sync profile so Owner sees registration request
+   try{await ensureUserProfile(session.user)}catch(e){console.warn('auth profile sync',e)}
    // Never auto-open Management for a normal page load or an existing session.
    // Only an explicit login action may open it.
    if(!explicitManagementLogin){return}
