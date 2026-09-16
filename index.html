@@ -60,7 +60,7 @@ section{position:relative;z-index:2;padding:90px 22px}.container{max-width:1200p
 .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.gallery-item{height:280px;border-radius:18px;border:1px solid #d6a72c2e;overflow:hidden;position:relative;background:linear-gradient(145deg,#21070c,#090909)}.gallery-item img,.gallery-item video{width:100%;height:100%;object-fit:cover}.gallery-item .caption{position:absolute;bottom:0;left:0;right:0;padding:12px;background:#000000b8;color:#fff}
 .donate-box{max-width:900px;margin:auto;text-align:center;padding:55px 30px;border-radius:28px;background:radial-gradient(circle at 50% 0%,#aa142340,transparent 55%),linear-gradient(145deg,#26080e,#080808);border:1px solid #ffd25040;box-shadow:0 25px 80px #00000080}.donate-box h2{font-size:42px;margin-bottom:15px}.donate-box p{color:#c2b4ad;max-width:650px;margin:0 auto 25px;line-height:1.7}.upi{display:inline-block;padding:13px 20px;border-radius:10px;background:#ffffff0d;border:1px solid #ffffff1a;color:var(--gold2);margin-bottom:25px}
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.contact-item{padding:22px;margin-bottom:15px;border-radius:15px;background:#ffffff06;border:1px solid #ffffff12}.contact-item b{color:var(--gold2);display:block;margin-bottom:6px}.contact-item span{color:#c1b4ae}
-.map{height:310px;border-radius:22px;border:1px solid #d6a72c2e;background:radial-gradient(circle at 50% 45%,#b3142a55,transparent 28%),linear-gradient(145deg,#19090b,#070707);display:grid;place-items:center;text-align:center;color:var(--muted);margin-top:22px}.map-icon{font-size:55px}
+.map{min-height:310px;border-radius:22px;border:1px solid #d6a72c2e;background:radial-gradient(circle at 50% 45%,#b3142a55,transparent 28%),linear-gradient(145deg,#19090b,#070707);display:grid;place-items:center;text-align:center;color:var(--muted);margin-top:22px;padding:12px;overflow:hidden}.map-icon{font-size:55px}#mapEmbedWrap{width:100%!important;height:310px!important}#mapIframe{width:100%!important;height:310px!important;border:0;border-radius:16px}#mapOpenWrap{margin-top:12px}
 .social-icons{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}.social-item{text-align:center}.social-icon{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;border:1px solid #d6a72c45;background:linear-gradient(145deg,#2a0c12,#100607);color:var(--gold2);transition:.3s}.social-icon:hover{transform:translateY(-5px) scale(1.04);box-shadow:0 0 25px #d6a72c45}.social-icon svg{width:25px;height:25px;fill:currentColor}.social-label{font-size:10px;color:#a99992;display:block;margin-top:6px}
 
 .hidden{display:none!important}
@@ -694,13 +694,13 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 <section class="impact" id="utsav"><div class="container"><div class="section-title"><small>🌺 MAA BHADRAKALI UTSAV</small><h2>उत्सव की <span style="color:var(--gold2)">मुख्य जानकारी</span></h2><p>इन सभी जानकारियों को Owner Management Panel से बदला जा सकता है।</p></div>
 <div class="stats"><div class="stat"><strong id="yearsStat">—</strong><span>वर्षों से माँ की आराधना</span></div><div class="stat"><strong id="navratriStat">9</strong><span>नवरात्रि दिवस</span></div><div class="stat"><strong id="arrivalStat">—</strong><span>माता आगमन</span></div><div class="stat"><strong id="mahaStat">—</strong><span>महाआरती</span></div></div></div></section>
 
-<section id="schedule"><div class="container"><div class="section-title"><small>🪔 दैनिक पूजा एवं आरती</small><h2>आरती का <span style="color:var(--gold2)">समय</span></h2><p>उत्सव के अनुसार समय Owner Panel से अपडेट किया जा सकता है।</p></div>
+<section id="schedule"><div class="container"><div class="section-title"><small>🪔 दैनिक पूजा एवं आरती</small><h2>आरती का <span style="color:var(--gold2)">समय</span></h2><p>उत्सव के अनुसार आरती एवं पूजा का समय यहाँ दिखाया जाता है।</p></div>
 <div class="causes">
-<div class="cause"><div class="cause-icon">🌸</div><h3>प्रातः शृंगार</h3><p id="shringarTime">समय Owner द्वारा अपडेट होगा।</p></div>
-<div class="cause"><div class="cause-icon">🪔</div><h3>प्रातः आरती</h3><p id="morningAarti">समय Owner द्वारा अपडेट होगा।</p></div>
-<div class="cause"><div class="cause-icon">🪔</div><h3>सायंकालीन आरती</h3><p id="eveningAarti">समय Owner द्वारा अपडेट होगा।</p></div>
-<div class="cause"><div class="cause-icon">🔥</div><h3>महा आरती</h3><p id="mahaAarti">समय Owner द्वारा अपडेट होगा।</p></div>
-<div class="cause"><div class="cause-icon">🙏</div><h3>प्रसाद / भंडारा</h3><p id="prasadText">प्रसाद एवं भंडारे की जानकारी Owner द्वारा अपडेट होगी।</p></div>
+<div class="cause"><div class="cause-icon">🌸</div><h3>प्रातः शृंगार</h3><p id="shringarTime">—</p></div>
+<div class="cause"><div class="cause-icon">🪔</div><h3>प्रातः आरती</h3><p id="morningAarti">—</p></div>
+<div class="cause"><div class="cause-icon">🪔</div><h3>सायंकालीन आरती</h3><p id="eveningAarti">—</p></div>
+<div class="cause"><div class="cause-icon">🔥</div><h3>महा आरती</h3><p id="mahaAarti">—</p></div>
+<div class="cause"><div class="cause-icon">🙏</div><h3>प्रसाद / भंडारा</h3><p id="prasadText">प्रसाद एवं भंडारे की जानकारी जल्द अपडेट की जाएगी।</p></div>
 </div></div></section>
 
 
@@ -711,7 +711,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
     <div class="section-title">
       <small>🌺 विशेष बैनर</small>
       <h2 id="lowerBannerHeading">उत्सव की विशेष झलक</h2>
-      <p id="lowerBannerText">यहाँ Owner Panel से 2 अलग-अलग बैनर लगाए और बदले जा सकते हैं।</p>
+      <p id="lowerBannerText">उत्सव की विशेष झलक यहाँ दिखाई जाएगी।</p>
     </div>
     <div class="lower-banner-slider" data-lower-two-slider>
       <div class="banner-track" id="lowerBannerTrack">
@@ -779,7 +779,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 
 <section id="live"><div class="container"><div class="donate-box">
   <div class="section-title"><small>🔴 LIVE AARTI</small><h2 id="publicLiveHeading">माँ की <span style="color:var(--gold2)">लाइव आरती</span></h2></div>
-  <p id="liveText">YouTube, Instagram और Facebook Live links Owner Panel से जोड़े जा सकते हैं।</p>
+  <p id="liveText">लाइव आरती के लिंक जल्द जोड़े जाएंगे।</p>
   <div id="liveLinksPublic" style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px">
     <a id="liveYoutubeBtn" href="#" class="btn btn-primary" style="display:none" target="_blank" rel="noopener">▶️ YouTube Live</a>
     <a id="liveInstagramBtn" href="#" class="btn btn-primary" style="display:none" target="_blank" rel="noopener">📸 Instagram Live</a>
@@ -792,7 +792,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 <div class="card person-card"><div class="photo-frame"><img id="panditPhoto" alt="पंडित जी"></div><h3 id="panditName">पंडित जी</h3><p>पूजा एवं धार्मिक अनुष्ठान</p></div></div>
 <div class="team-grid" id="publicTeamGrid"></div></div></section>
 
-<section id="donate"><div class="container"><div class="donate-box"><div class="section-title"><small>🌺 प्रसाद • भंडारा • सहयोग</small><h2>माँ के उत्सव में <span style="color:var(--gold2)">सहयोग</span></h2></div><p id="donationText">माँ के धार्मिक आयोजन, प्रसाद एवं भंडारे में सहयोग की जानकारी यहाँ Owner द्वारा अपडेट की जाएगी।</p><div class="upi" id="publicUpi">UPI ID: अभी अपडेट होना बाकी है</div>
+<section id="donate" style="display:none"><div class="container"><div class="donate-box"><div class="section-title"><small>🌺 प्रसाद • भंडारा • सहयोग</small><h2>माँ के उत्सव में <span style="color:var(--gold2)">सहयोग</span></h2></div><p id="donationText">माँ के धार्मिक आयोजन, प्रसाद एवं भंडारे में आपका सहयोग अमूल्य है।</p><div class="upi" id="publicUpi" style="display:none">UPI ID: —</div>
 <div id="publicQrWrap" style="display:none;margin:18px auto 8px;text-align:center">
   <div style="color:var(--gold2);font-weight:800;margin-bottom:10px">📲 QR / Scanner से सहयोग करें</div>
   <img id="publicQr" alt="Donation QR Scanner" style="width:min(280px,80vw);aspect-ratio:1;object-fit:contain;background:#fff;padding:10px;border-radius:16px;border:2px solid #ffd966;box-shadow:0 10px 35px #0008">
@@ -809,12 +809,12 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 <div class="social-item"><a id="xLink" class="social-icon x-icon" href="#" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24"><path d="M4 3l6.4 8.6L4.4 21h2.9l4.4-5.2 3.9 5.2H20l-6.8-9.1L19.5 3h-2.9l-4 4.7L9 3H4zm4.7 2h1.2l6.3 14h-1.2L8.7 5z"/></svg></a><span class="social-label">X / Twitter</span></div>
 </div></div></div>
 <div class="card"><form class="feedback-form" onsubmit="sendMessage(event)">
-<input placeholder="आपका नाम" required>
-<input type="tel" placeholder="मोबाइल नंबर" required>
-<input type="email" placeholder="ईमेल">
-<textarea placeholder="आपका संदेश" required></textarea>
+<input id="fbName" placeholder="आपका नाम" required>
+<input id="fbPhone" type="tel" placeholder="मोबाइल नंबर" required>
+<input id="fbEmail" type="email" placeholder="ईमेल">
+<textarea id="fbMessage" placeholder="आपका संदेश" required></textarea>
 <button type="submit">संदेश भेजें</button>
-</form><div class="map"><div><div class="map-icon">📍</div><h3 style="color:var(--gold2)">Google Map / Location</h3><p id="mapText">समिति की exact Google Maps location Owner Panel से जोड़ी जाएगी।</p></div></div></div></div>
+</form><div class="map" id="mapBox"><div id="mapPlaceholder"><div class="map-icon">📍</div><h3 style="color:var(--gold2)">Google Map / Location</h3><p id="mapText">झांसी • तल्लैया मोहल्ला • माँ भद्रकाली उत्सव समिति</p></div><div id="mapEmbedWrap" style="display:none;width:100%;height:100%;border-radius:18px;overflow:hidden"><iframe id="mapIframe" title="Google Map" style="width:100%;height:310px;border:0;border-radius:18px" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div><div id="mapOpenWrap" style="display:none;margin-top:12px"><a id="mapOpenBtn" class="btn btn-primary" href="#" target="_blank" rel="noopener">📍 Open in Google Maps</a></div></div></div></div>
 </div></section>
 
 <div id="authPanel"><div class="auth-box"><div class="auth-head"><div><h2 id="authTitle">🔐 Login</h2><p style="margin-top:5px;color:#3c2a08">केवल अधिकृत Owner / Team Member</p></div><button class="auth-close" onclick="closeAuthPanel()">✕</button></div>
@@ -870,7 +870,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
       </div>
       <div class="manager-card" id="cardLive" data-access="live"><h3>🔴 Live Aarti</h3><label>YouTube Live</label><input id="mLiveYoutube" class="owner-input"><label>Instagram Live</label><input id="mLiveInstagram" class="owner-input"><label>Facebook Live</label><input id="mLiveFacebook" class="owner-input"><button onclick="saveLiveLinks()">💾 Save Live Links</button></div>
       <div class="manager-card" id="cardVideo" data-access="video"><h3>🎬 Video</h3><p>Website के video uploads यहाँ अलग manage करें। (हर video अधिकतम 50MB — Supabase free limit)</p><div class="media-admin-grid"><div class="media-admin-card"><b>Video 1 — 16:9</b><input id="mVideo1" type="file" accept="video/*"></div><div class="media-admin-card"><b>Video 2 — 9:16</b><input id="mVideo2" type="file" accept="video/*"></div><div class="media-admin-card"><b>Video 3 — 9:16</b><input id="mVideo3" type="file" accept="video/*"></div></div><button onclick="saveVideosOnly()">💾 Save Videos</button><div id="mVideoList" class="manager-note">Video Gallery से अलग permission के साथ manage होगी।</div></div>
-      <div class="manager-card" id="cardCreator" data-access="creator"><h3>👨‍💻 Website Creator</h3><label>Creator Name</label><input id="mCreatorName" class="owner-input"><label>Creator Photo URL</label><input id="mCreatorPhoto" class="owner-input"><button onclick="saveCreatorInfo()">💾 Save Creator Info</button></div>
+      <div class="manager-card" id="cardCreator" data-access="creator"><h3>👨‍💻 Website Creator</h3><label>Creator Name</label><input id="mCreatorName" class="owner-input"><label>Creator Photo (Upload)</label><input id="mCreatorPhotoFile" class="owner-input" type="file" accept="image/*"><label>या Photo URL (optional)</label><input id="mCreatorPhoto" class="owner-input" placeholder="https://..."><button onclick="saveCreatorInfo()">💾 Save Creator Info</button></div>
       <div class="manager-card content-editor" id="cardText" data-access="text"><h3>✏️ Website Text</h3><label>Hero Badge</label><input id="editHeroBadge" class="owner-input"><label>Hero Heading</label><textarea id="editHeroTitle" class="owner-textarea"></textarea><label>Hero Description</label><textarea id="editHeroDesc" class="owner-textarea"></textarea><label>About Heading</label><input id="editAboutHeading" class="owner-input"><label>About Description</label><textarea id="editAboutDesc" class="owner-textarea"></textarea><label>Gallery Heading</label><input id="editGalleryHeading" class="owner-input"><label>Gallery Description</label><textarea id="editGalleryText" class="owner-textarea"></textarea><label>Live Aarti Heading</label><input id="editLiveHeading" class="owner-input"><label>Contact Heading</label><input id="editContactHeading" class="owner-input"><label>Contact Description</label><textarea id="editContactText" class="owner-textarea"></textarea><button onclick="saveAllWebsiteText()">💾 Save Website Text</button></div>
       <div class="manager-card" id="cardSeo" data-access="seo"><h3>🔍 Google SEO Description</h3><p>Google Search के लिए अलग description.</p><textarea id="editSeoDescription" class="owner-textarea" placeholder="Google Search description"></textarea><button onclick="saveSeoDescriptionOnly()">💾 Save Google SEO Description</button></div>
       <div class="manager-card" id="cardGallery" data-access="gallery"><h3>📸 Gallery</h3><div class="media-admin-grid gallery-admin-grid"><div class="media-admin-card"><b>Photo 1</b><input id="mGallery1" type="file" accept="image/*"><input id="mCaption1" placeholder="Photo 1 Caption"></div><div class="media-admin-card"><b>Photo 2</b><input id="mGallery2" type="file" accept="image/*"><input id="mCaption2" placeholder="Photo 2 Caption"></div><div class="media-admin-card"><b>Photo 3</b><input id="mGallery3" type="file" accept="image/*"><input id="mCaption3" placeholder="Photo 3 Caption"></div><div class="media-admin-card"><b>Slider Photo 1</b><input id="mGallery4_1" type="file" accept="image/*"></div><div class="media-admin-card"><b>Slider Photo 2</b><input id="mGallery4_2" type="file" accept="image/*"></div><div class="media-admin-card"><b>Slider Photo 3</b><input id="mGallery4_3" type="file" accept="image/*"></div><div class="media-admin-card"><b>Slider Photo 4</b><input id="mGallery4_4" type="file" accept="image/*"></div><div class="media-admin-card"><b>Single Photo</b><input id="mGallerySingle" type="file" accept="image/*"><input id="mCaptionSingle" placeholder="Single Photo Caption"></div></div><button onclick="saveGalleryPhotosOnly()">💾 Save Gallery Photos</button><div id="mGalleryList" class="manager-note">Gallery photos यहाँ manage होंगी।</div></div>
@@ -878,7 +878,9 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
       <div class="manager-card" id="cardSocial" data-access="social"><h3>📱 Social Media</h3><label>Facebook</label><input id="mFacebook" class="owner-input"><label>Instagram 1</label><input id="mInstagram" class="owner-input"><label>Instagram 2</label><input id="mInstagram2" class="owner-input"><label>WhatsApp</label><input id="mWhatsApp" class="owner-input"><label>Threads</label><input id="mThreads" class="owner-input"><label>X / Twitter</label><input id="mX" class="owner-input"><button onclick="saveLogoSocial('social')">💾 Save Social Media</button></div>
       <div class="manager-card" id="cardLogo" data-access="logo"><h3>🎨 Logo</h3><label>ऊपर Header Logo</label><input id="mHeaderLogo" class="owner-input" type="file" accept="image/*"><label>बीच वाला बड़ा Logo</label><input id="mMiddleLogo" class="owner-input" type="file" accept="image/*"><button onclick="saveLogoSocial('logo')">💾 Save Logos</button></div>
       <div class="manager-card" id="cardContact" data-access="contact"><h3>📞 Contact</h3><label>फोन</label><input id="mPhone" class="owner-input"><label>ईमेल</label><input id="mEmail" class="owner-input"><label>पूरा पता</label><textarea id="mAddress" class="owner-textarea"></textarea><button onclick="saveSettings()">💾 Save Contact</button></div>
-      <div class="manager-card" id="cardMap" data-access="map"><h3>📍 Google Map</h3><label>Google Maps URL</label><input id="mMap" class="owner-input" placeholder="Google Maps link"><button onclick="saveSettings()">💾 Save Google Map</button></div>
+      <div class="manager-card" id="cardMap" data-access="map"><h3>📍 Google Map</h3><label>Google Maps URL</label><input id="mMap" class="owner-input" placeholder="Google Maps share/embed link"><button onclick="saveSettings()">💾 Save Google Map</button><p class="access-help">Public page पर iframe map + “Open in Google Maps” button दिखेगा।</p></div>
+      <div class="manager-card" id="cardFeedback" data-access="feedback"><h3>📨 Feedback / संदेश</h3><p>Website से भेजे गए messages यहाँ दिखेंगे।</p><div id="feedbackList"><div class="user-id-empty">⏳ Feedback load हो रही है…</div></div><button type="button" onclick="loadFeedbackMessages()">🔄 Refresh</button></div>
+      <div class="manager-card" id="cardDonateToggle" data-access="prasad"><h3>💝 सहयोग Section ON/OFF</h3><p>Public website पर Donate / सहयोग section default बंद रहता है। जब QR / UPI तैयार हो तब चालू करें।</p><label style="display:flex;align-items:center;gap:10px;margin:12px 0"><input type="checkbox" id="mDonateVisible" style="transform:scale(1.3)"> Public page पर सहयोग section दिखाएँ</label><button onclick="saveDonateVisibility()">💾 Save Visibility</button></div>
       <div class="manager-card" id="cardRegistrationIds" data-access="registrationIds"><h3>🪪 Registration ID View</h3><p>सभी registered users की professional ID cards यहाँ केवल view की जा सकती हैं।</p><div id="registeredUsersList"><div class="user-id-empty">⏳ Registered users load हो रहे हैं…</div></div></div>
       <div class="manager-card" id="cardRegistrationRequests" data-access="registrationRequests" data-owner-only="true"><h3>📨 New Registration Requests</h3><p>नई registration को approve/reject करें और हर user की अलग permissions दें।</p><div id="registrationRequestsList"><div class="user-id-empty">⏳ New requests load हो रही हैं…</div></div></div>
       <div class="manager-card" id="cardApprovedTeam" data-access="approvedTeam" data-owner-only="true"><h3>✅ Approved Team Members</h3><p>Owner द्वारा approve किए गए team members की Team ID, name और number यहाँ दिखेंगे।</p><div id="approvedTeamList"><div class="user-id-empty">⏳ Approved team load हो रही है…</div></div></div>
@@ -910,14 +912,14 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 
 const defaults={
  years:'—',navratri:'9',arrival:'—',maha:'—',
- shringar:'समय Owner द्वारा अपडेट होगा।',
- morning:'समय Owner द्वारा अपडेट होगा।',
- eveningPuja:'समय Owner द्वारा अपडेट होगा।',
- eveningAarti:'समय Owner द्वारा अपडेट होगा।',
- mahaAarti:'समय Owner द्वारा अपडेट होगा।',
- prasad:'प्रसाद एवं भंडारे की जानकारी Owner द्वारा अपडेट होगी।',
+ shringar:'—',
+ morning:'—',
+ eveningPuja:'—',
+ eveningAarti:'—',
+ mahaAarti:'—',
+ prasad:'प्रसाद एवं भंडारे की जानकारी जल्द अपडेट की जाएगी।',
  pandit:'पंडित जी',president:'अध्यक्ष',treasurer:'कोषाध्यक्ष',
- upi:'',donation:'माँ के धार्मिक आयोजन, प्रसाद एवं भंडारे में सहयोग की जानकारी यहाँ Owner द्वारा अपडेट की जाएगी।',
+ upi:'',donation:'माँ के धार्मिक आयोजन, प्रसाद एवं भंडारे में आपका सहयोग अमूल्य है।',
  phone:'+91 XXXXXXXXXX',email:'',address:'झाँसी, उत्तर प्रदेश, भारत',map:'',live:'',
  heroDesc:'माँ भद्रकाली की भक्ति, पूजा, नवरात्रि उत्सव, माता आगमन, आरती, महाआरती, प्रसाद और धार्मिक आयोजनों की आधिकारिक जानकारी।',
  seoDescription:'MAA BHADRAKALI UTSAV SAMITI JHANSI की आधिकारिक वेबसाइट। झाँसी के तल्लैया मोहल्ला में माँ भद्रकाली के नवरात्रि उत्सव, माता आगमन, पूजा, आरती, महाआरती, प्रसाद, धार्मिक कार्यक्रम और उत्सव की सभी महत्वपूर्ण जानकारी यहाँ प्राप्त करें।',
@@ -926,9 +928,9 @@ const defaults={
 let settings={...defaults};
 let currentAuthUser=null;
 let explicitManagementLogin=false;
-const ACCESS_KEYS=["banners","utsav","aarti","committee","prasad","live","video","creator","text","seo","gallery","team","social","logo","contact","map","registrationIds","registrationRequests","approvedTeam"];
+const ACCESS_KEYS=["banners","utsav","aarti","committee","prasad","live","video","creator","text","seo","gallery","team","social","logo","contact","map","feedback","registrationIds","registrationRequests","approvedTeam"];
 const MENU_ITEMS={
- banners:"🖼️ Banners",utsav:"🌺 उत्सव जानकारी",aarti:"🪔 आरती / पूजा",committee:"👑 पदाधिकारी",prasad:"🍚 प्रसाद / Donation",live:"🔴 Live Aarti",video:"🎬 Video",creator:"👨‍💻 Website Creator",text:"✏️ Website Text",seo:"🔍 Google SEO Description",gallery:"📸 Gallery",team:"👥 Team Members",social:"📱 Social Media",logo:"🎨 Logo",contact:"📞 Contact",map:"📍 Google Map",registrationIds:"🪪 Registration ID View",registrationRequests:"📨 New Registration Requests",approvedTeam:"✅ Approved Team Members"};
+ banners:"🖼️ Banners",utsav:"🌺 उत्सव जानकारी",aarti:"🪔 आरती / पूजा",committee:"👑 पदाधिकारी",prasad:"🍚 प्रसाद / Donation",live:"🔴 Live Aarti",video:"🎬 Video",creator:"👨‍💻 Website Creator",text:"✏️ Website Text",seo:"🔍 Google SEO Description",gallery:"📸 Gallery",team:"👥 Team Members",social:"📱 Social Media",logo:"🎨 Logo",contact:"📞 Contact",map:"📍 Google Map",feedback:"📨 Feedback / संदेश",registrationIds:"🪪 Registration ID View",registrationRequests:"📨 New Registration Requests",approvedTeam:"✅ Approved Team Members"};
 const OWNER_EMAIL="kubersahu7807@gmail.com";
 
 function toast(msg){
@@ -1005,8 +1007,14 @@ function render(){
  if(c.presidentPhoto)document.getElementById('presidentPhoto').src=c.presidentPhoto;
  if(c.treasurerPhoto)document.getElementById('treasurerPhoto').src=c.treasurerPhoto;
  renderTeamV3();
- const pu=document.getElementById('publicUpi');if(pu)pu.textContent=settings.upi?'UPI ID: '+settings.upi:'UPI ID: अभी अपडेट होना बाकी है';
- const mt=document.getElementById('mapText');if(mt)mt.textContent=settings.map?'Google Maps location Owner Panel से जोड़ी गई है।':'समिति की exact Google Maps location Owner Panel से जोड़ी जाएगी।';
+ renderPublicMap();
+ renderDonateVisibility();
+ const pu=document.getElementById('publicUpi');
+ if(pu){
+   if(settings.upi){pu.textContent='UPI ID: '+settings.upi;pu.style.display='inline-block'}
+   else{pu.textContent='';pu.style.display='none'}
+ }
+
  const hd=document.getElementById('heroDescription');if(hd)hd.textContent=settings.heroDesc;
  const ap=document.querySelector('#about .section-title p');if(ap)ap.textContent=settings.aboutDesc;
  const ed=document.getElementById('editHeroDesc');if(ed)ed.value=settings.heroDesc;
@@ -1021,7 +1029,8 @@ async function loadSettings(){
    settings={...defaults,...data.settings};
    if(settings.brandSocial)finalStore('mbus_brand_social',settings.brandSocial);
    if(settings.banners)finalStore('mbus_banners',settings.banners);
-   if(settings.donation)finalStore('mbus_donation_final',settings.donation);
+   if(settings.donation){finalStore('mbus_donation_final',settings.donation);settings.donationData=settings.donation;}
+   if(settings.feedbackList)finalStore('mbus_feedback_remote',settings.feedbackList);
    if(settings.gallery)finalStore('mbus_gallery_final',settings.gallery);
    if(settings.committee)finalStore('mbus_committee_v3',settings.committee);
    if(settings.teamMembers)finalStore('mbus_team_v3',settings.teamMembers);
@@ -1311,6 +1320,7 @@ function renderFinalGalleryMedia(){
  const se=document.getElementById('gallerySingle');if(se){se.src=d.single||'';se.style.display=d.single?'block':'none'}
  const sc=document.getElementById('gallerySingleCap');if(sc)sc.textContent=d.singleCap||'विशेष उत्सव फोटो';
  for(let i=1;i<=3;i++){const v=document.getElementById('galleryVideo'+i);if(v){if(d['v'+i]){if(v.src!==d['v'+i]){v.src=d['v'+i];v.load()}v.style.display='block'}else{v.removeAttribute('src');v.style.display='none'}}}
+ setTimeout(setupVideoAutoplay,300);
 }
 
 /* ===== COMMITTEE + TEAM ===== */
@@ -1412,11 +1422,28 @@ function buildUserIdCard(u, controls=false){
 }
 async function loadRegisteredUsers(){
  const viewBox=document.getElementById('registeredUsersList'),reqBox=document.getElementById('registrationRequestsList');
- try{const {data,error}=await sb.from('user_profiles').select('*').order('created_at',{ascending:false});if(error)throw error;
+ try{
+  // Ensure session is active before querying RLS-protected table
+  const {data:sess}=await sb.auth.getSession();
+  if(!sess?.session){throw new Error('Login session missing — फिर से Login करें।')}
+  let data=null,error=null;
+  ({data,error}=await sb.from('user_profiles').select('*').order('created_at',{ascending:false}));
+  if(error){
+    // fallback without order
+    ({data,error}=await sb.from('user_profiles').select('*'));
+  }
+  if(error)throw error;
   if(viewBox)viewBox.innerHTML='';if(reqBox)reqBox.innerHTML='';
-  if(!data?.length){if(viewBox)viewBox.innerHTML='<div class="user-id-empty">अभी कोई registered user नहीं मिला।</div>';if(reqBox)reqBox.innerHTML='<div class="user-id-empty">अभी कोई new registration request नहीं है।</div>';return}
-  data.forEach(u=>{if(viewBox)viewBox.appendChild(buildUserIdCard(u,false));if(reqBox&&((u.status||'pending')==='pending'))reqBox.appendChild(buildUserIdCard(u,true));});if(reqBox&&!reqBox.children.length)reqBox.innerHTML='<div class="user-id-empty">अभी कोई pending registration request नहीं है।</div>';loadApprovedTeamMembers();
- }catch(e){console.error(e);const msg='<div class="user-id-empty">❌ Users load नहीं हुए। Supabase में <b>user_profiles</b> table/RLS SQL setup करें।</div>';if(viewBox)viewBox.innerHTML=msg;if(reqBox)reqBox.innerHTML=msg}
+  if(!data?.length){if(viewBox)viewBox.innerHTML='<div class="user-id-empty">अभी कोई registered user नहीं मिला।</div>';if(reqBox)reqBox.innerHTML='<div class="user-id-empty">अभी कोई new registration request नहीं है।</div>';loadApprovedTeamMembers();return}
+  data.forEach(u=>{if(viewBox)viewBox.appendChild(buildUserIdCard(u,false));if(reqBox&&((u.status||'pending')==='pending'))reqBox.appendChild(buildUserIdCard(u,true));});
+  if(reqBox&&!reqBox.children.length)reqBox.innerHTML='<div class="user-id-empty">अभी कोई pending registration request नहीं है।</div>';
+  loadApprovedTeamMembers();
+ }catch(e){
+  console.error(e);
+  const detail=escapeHtml(e?.message||String(e));
+  const msg='<div class="user-id-empty">❌ Users load नहीं हुए।<br><small>'+detail+'</small><br><br>Supabase SQL Editor में ये policies चलाएँ:<br><code style="font-size:11px;word-break:break-all">alter table user_profiles enable row level security;<br>create policy "owner_read_profiles" on user_profiles for select to authenticated using (true);<br>create policy "owner_update_profiles" on user_profiles for update to authenticated using (true);</code></div>';
+  if(viewBox)viewBox.innerHTML=msg;if(reqBox)reqBox.innerHTML=msg;
+ }
 }
 function buildApprovedTeamCard(u){
  const id=u.team_id||makeTeamId((u.id||'')+(u.email||''));
@@ -1432,14 +1459,18 @@ function buildApprovedTeamCard(u){
 async function loadApprovedTeamMembers(){
  const box=document.getElementById('approvedTeamList');if(!box)return;
  try{
-  const {data,error}=await sb.from('user_profiles').select('*').eq('status','approved').order('created_at',{ascending:false});
+  const {data:sess}=await sb.auth.getSession();
+  if(!sess?.session){throw new Error('Login session missing')}
+  let data=null,error=null;
+  ({data,error}=await sb.from('user_profiles').select('*').eq('status','approved').order('created_at',{ascending:false}));
+  if(error)({data,error}=await sb.from('user_profiles').select('*').eq('status','approved'));
   if(error)throw error;
   box.innerHTML='';
   if(!data?.length){box.innerHTML='<div class="user-id-empty">अभी कोई approved team member नहीं है।</div>';return}
   data.forEach(u=>box.appendChild(buildApprovedTeamCard(u)));
  }catch(e){
   console.error(e);
-  box.innerHTML='<div class="user-id-empty">❌ Approved team list load नहीं हुई।</div>';
+  box.innerHTML='<div class="user-id-empty">❌ Approved team list load नहीं हुई।<br><small>'+escapeHtml(e?.message||'')+'</small></div>';
  }
 }
 
@@ -1472,7 +1503,7 @@ async function applyManagementAccess(user){
  }catch(e){console.warn('Profile read:',e)}
  if(isOwner){
    panel.classList.add('open');document.body.style.overflow='hidden';titleEl.textContent='⚙️ Owner Management Panel';roleEl.textContent='Owner • Full Management Access';
-   renderCurrentUserIdCard(user,profile,null,true);renderManagementMenu(ACCESS_KEYS);loadFinalForms();loadRegisteredUsers();loadApprovedTeamMembers();
+   renderCurrentUserIdCard(user,profile,null,true);renderManagementMenu(ACCESS_KEYS);loadFinalForms();loadRegisteredUsers();loadApprovedTeamMembers();loadFeedbackMessages();
    // Keep the same management card open after Android file-picker/page lifecycle events.
    let active='';try{active=localStorage.getItem('mbus_management_active_card')||''}catch(e){}
    if(active&&ACCESS_KEYS.includes(active))setTimeout(()=>openManagementMenu(active),0);
@@ -1587,24 +1618,35 @@ function openManagementMenu(key){
 /* ===== DONATION / LIVE / SOCIAL ===== */
 async function saveDonationData(){
  try{
+  if(!requireAuthenticated())return;
   const d={...finalGet('mbus_donation_final',{})};
   d.upi=document.getElementById('mUpi')?.value.trim()||'';
   d.prasad=document.getElementById('mPrasad')?.value.trim()||'';
   d.donation=document.getElementById('mDonation')?.value.trim()||'';
+  // keep previous visibility flag
+  if(typeof d.visible!=='boolean')d.visible=!!settings.donateVisible;
   const f=document.getElementById('mQr')?.files[0];
   if(f)d.qr=await uploadPublicMedia(await compressGalleryImage(f,1200),'donation');
+  settings.donationData=d;
   finalStore('mbus_donation_final',d);
   const ok=await saveRemoteExtras('donation',d);
   if(!ok)throw new Error('Donation data online save नहीं हुआ।');
-  renderDonation();toast('✓ QR image save हो गई। सभी phones पर दिखेगी।');
+  renderDonation();toast('✓ QR / UPI save हो गया। (Section दिखाने के लिए Visibility ON करें)');
  }catch(e){console.error(e);toast('❌ QR save नहीं हुआ। Supabase Storage/policy check करें।')}
 }
 function renderDonation(){
- const d=settings.donation||finalGet('mbus_donation_final',{}),qr=document.getElementById('publicQr'),wrap=document.getElementById('publicQrWrap');
+ const d=settings.donationData||settings.donation||finalGet('mbus_donation_final',{});
+ const qr=document.getElementById('publicQr'),wrap=document.getElementById('publicQrWrap');
  if(wrap)wrap.style.display=d.qr?'block':'none';
  if(qr){if(d.qr)qr.src=d.qr;else qr.removeAttribute('src');}
+ const upiVal=d.upi||settings.upi||'';
  const upi=document.getElementById('upiBtn');
- if(upi){const u=d.upi||settings.upi||'';upi.style.display=u?'inline-block':'none';upi.href=u?'upi://pay?pa='+encodeURIComponent(u)+'&cu=INR':'#'}
+ if(upi){upi.style.display=upiVal?'inline-block':'none';upi.href=upiVal?'upi://pay?pa='+encodeURIComponent(upiVal)+'&cu=INR':'#'}
+ const pu=document.getElementById('publicUpi');
+ if(pu){if(upiVal){pu.textContent='UPI ID: '+upiVal;pu.style.display='inline-block'}else{pu.style.display='none'}}
+ const dt=document.getElementById('donationText');
+ if(dt&&(d.donation||settings.donation))dt.textContent=d.donation||settings.donation;
+ renderDonateVisibility();
 }
 async function saveLiveLinks(){
  const d={youtube:document.getElementById('mLiveYoutube')?.value.trim()||'',instagram:document.getElementById('mLiveInstagram')?.value.trim()||'',facebook:document.getElementById('mLiveFacebook')?.value.trim()||''};
@@ -1612,7 +1654,7 @@ async function saveLiveLinks(){
  const ok=await saveRemoteExtras('live',d);
  renderLive();toast(ok?'✓ तीनों Live links सभी phones के लिए online save हो गए।':'⚠️ Live links local save हुए; online save नहीं हुआ।');
 }
-function renderLive(){const d=settings.live||finalGet('mbus_live_final',{}),items=[['liveYoutubeBtn',d.youtube],['liveInstagramBtn',d.instagram],['liveFacebookBtn',d.facebook]];items.forEach(([id,url])=>{const e=document.getElementById(id);if(e){e.style.display=url?'inline-block':'none';e.href=url||'#'}});const t=document.getElementById('liveText');if(t)t.textContent=(d.youtube||d.instagram||d.facebook)?'नीचे दिए platform button से Live Aarti देखें।':'YouTube, Instagram और Facebook Live links Owner Panel से जोड़े जा सकते हैं।'}
+function renderLive(){const d=settings.live||finalGet('mbus_live_final',{}),items=[['liveYoutubeBtn',d.youtube],['liveInstagramBtn',d.instagram],['liveFacebookBtn',d.facebook]];items.forEach(([id,url])=>{const e=document.getElementById(id);if(e){e.style.display=url?'inline-block':'none';e.href=url||'#'}});const t=document.getElementById('liveText');if(t)t.textContent=(d.youtube||d.instagram||d.facebook)?'नीचे दिए platform button से Live Aarti देखें।':'लाइव आरती के लिंक जल्द जोड़े जाएंगे।'}
 function saveLogoSocial(mode="both"){return (async()=>{
  try{
   const d={...finalGet('mbus_brand_social',{})};
@@ -1661,20 +1703,36 @@ function loadCreatorInfo(){
   if(n)n.value=d.name||'';if(p)p.value=d.photo||'';renderCreatorInfo();
 }
 async function saveCreatorInfo(){
+  if(!requireAuthenticated())return;
   const name=(document.getElementById('mCreatorName')?.value||'').trim();
-  const photo=(document.getElementById('mCreatorPhoto')?.value||'').trim();
+  let photo=(document.getElementById('mCreatorPhoto')?.value||'').trim();
+  const file=document.getElementById('mCreatorPhotoFile')?.files?.[0];
   if(!name){toast('❌ Creator का नाम भरें।');return}
-  const d={name,photo:photo||''};
-  finalStore('mbus_creator',d);
-  const ok=await saveRemoteExtras('creator',d);
-  renderCreatorInfo();
-  toast(ok?'✓ Creator की जानकारी सभी phones के लिए online save हो गई।':'⚠️ Creator local save हुआ; online save नहीं हुआ।');
+  try{
+    if(file){
+      toast('⏳ Creator photo upload हो रही है…');
+      photo=await uploadPublicMedia(await compressGalleryImage(file,900),'branding/creator');
+    }
+    const d={name,photo:photo||''};
+    settings.creator=d;
+    finalStore('mbus_creator',d);
+    const ok=await saveRemoteExtras('creator',d);
+    renderCreatorInfo();
+    toast(ok?'✓ Creator name + photo सभी phones पर save हो गया।':'⚠️ Creator local save हुआ; online save नहीं हुआ।');
+  }catch(e){
+    console.error(e);
+    toast('❌ Creator save fail: '+(e?.message||'upload/error'));
+  }
 }
 function renderCreatorInfo(){
   const d=settings.creator||finalGet('mbus_creator',{name:'Creator Name',photo:''});
   const n=document.getElementById('creatorName'),p=document.getElementById('creatorPhoto');
   if(n)n.textContent=d.name||'Creator Name';
-  if(p){p.src=d.photo||'';p.onerror=()=>{p.removeAttribute('src')}}
+  if(p){
+    if(d.photo){p.src=d.photo;p.style.display='block'}
+    else{p.removeAttribute('src');p.style.display='none'}
+    p.onerror=()=>{p.removeAttribute('src');p.style.display='none'}
+  }
 }
 
 /* ===== WEBSITE TEXT ===== */
@@ -1702,7 +1760,162 @@ async function saveAllWebsiteText(){
 function renderFinalWebsiteText(){const d=settings.websiteText||finalGet('mbus_text_final',{});const e1=document.getElementById('heroBadge');if(e1&&d.editHeroBadge)e1.textContent=d.editHeroBadge;const e2=document.getElementById('heroTitle');if(e2&&d.editHeroTitle)e2.innerHTML=String(d.editHeroTitle).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');const e3=document.getElementById('heroDescription');if(e3&&d.editHeroDesc)e3.textContent=d.editHeroDesc;const ah=document.querySelector('#about .section-title h2');if(ah&&d.editAboutHeading)ah.textContent=d.editAboutHeading;const ap=document.querySelector('#about .section-title p');if(ap&&d.editAboutDesc)ap.textContent=d.editAboutDesc;const gh=document.getElementById('galleryHeading');if(gh&&d.editGalleryHeading)gh.textContent=d.editGalleryHeading;const gp=document.getElementById('galleryText');if(gp&&d.editGalleryText)gp.textContent=d.editGalleryText;const lh=document.querySelector('#live h2');if(lh&&d.editLiveHeading)lh.textContent=d.editLiveHeading;const ch=document.querySelector('#contact h2');if(ch&&d.editContactHeading)ch.textContent=d.editContactHeading;const cp=document.querySelector('#contact .section-title p');if(cp&&d.editContactText)cp.textContent=d.editContactText;updateSeoDescription()}
 function loadFinalForms(){const defs={editHeroBadge:'🔱 जय माँ भद्रकाली • झाँसी',editHeroTitle:'माँ भद्रकाली\nउत्सव समिति, झाँसी',editHeroDesc:defaults.heroDesc,editSeoDescription:settings.seoDescription||defaults.seoDescription,editAboutHeading:'माँ की भक्ति, उत्सव का संकल्प',editAboutDesc:defaults.aboutDesc,editGalleryHeading:'माँ के उत्सव की झलक',editGalleryText:'',editLiveHeading:'माँ की लाइव आरती',editContactHeading:'माँ के भक्तों से जुड़ाव',editContactText:'दर्शन, पूजा, उत्सव या समिति से संबंधित जानकारी के लिए संपर्क करें.'},d=settings.websiteText||finalGet('mbus_text_final',{});Object.keys(defs).forEach(id=>{const e=document.getElementById(id);if(e)e.value=d[id]??defs[id]});const b=finalGet('mbus_banners',{});document.getElementById('mLowerHeading')&&(document.getElementById('mLowerHeading').value=b.lowerHeading||'');document.getElementById('mLowerText')&&(document.getElementById('mLowerText').value=b.lowerText||'');renderFinalStoredBanners();if(settings.gallery)finalStore('mbus_gallery_final',settings.gallery);renderFinalGalleryMedia();renderFinalWebsiteText();}
 
-function sendMessage(e){e.preventDefault();toast('धन्यवाद! आपका संदेश प्राप्त हुआ।')}
+
+/* ===== GOOGLE MAP PUBLIC RENDER ===== */
+function toEmbedMapUrl(url){
+  if(!url)return '';
+  const u=String(url).trim();
+  if(!u)return '';
+  // already embed
+  if(/google\.[^/]+\/maps\/embed/i.test(u))return u;
+  // extract coords @lat,lng
+  let m=u.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m)return 'https://www.google.com/maps?q='+m[1]+','+m[2]+'&z=16&output=embed';
+  // place or search query
+  m=u.match(/[?&]q=([^&]+)/);
+  if(m)return 'https://www.google.com/maps?q='+m[1]+'&z=16&output=embed';
+  // pb= embed param
+  m=u.match(/[?&]pb=([^&]+)/);
+  if(m)return 'https://www.google.com/maps/embed?pb='+m[1];
+  // generic maps link -> embed via q=
+  if(/google\.[^/]+\/maps/i.test(u)){
+    try{
+      const parsed=new URL(u);
+      const q=parsed.searchParams.get('q')||parsed.pathname;
+      return 'https://www.google.com/maps?q='+encodeURIComponent(q.replace(/^\/maps\//,''))+'&z=16&output=embed';
+    }catch(e){}
+    return 'https://www.google.com/maps?q='+encodeURIComponent(u)+'&output=embed';
+  }
+  // plain address or coords
+  return 'https://www.google.com/maps?q='+encodeURIComponent(u)+'&z=16&output=embed';
+}
+function renderPublicMap(){
+  const url=(settings.map||'').trim();
+  const placeholder=document.getElementById('mapPlaceholder');
+  const embedWrap=document.getElementById('mapEmbedWrap');
+  const iframe=document.getElementById('mapIframe');
+  const openWrap=document.getElementById('mapOpenWrap');
+  const openBtn=document.getElementById('mapOpenBtn');
+  const mt=document.getElementById('mapText');
+  if(!url){
+    if(placeholder)placeholder.style.display='block';
+    if(embedWrap)embedWrap.style.display='none';
+    if(openWrap)openWrap.style.display='none';
+    if(mt)mt.textContent='झांसी • तल्लैया मोहल्ला • माँ भद्रकाली उत्सव समिति';
+    return;
+  }
+  const embed=toEmbedMapUrl(url);
+  if(placeholder)placeholder.style.display='none';
+  if(embedWrap)embedWrap.style.display='block';
+  if(iframe&&embed)iframe.src=embed;
+  if(openWrap)openWrap.style.display='block';
+  if(openBtn){openBtn.href=url;openBtn.style.display='inline-block'}
+}
+
+/* ===== DONATE VISIBILITY ===== */
+function renderDonateVisibility(){
+  const d=settings.donationData||finalGet('mbus_donation_final',{});
+  const visible=!!(d.visible||settings.donateVisible);
+  const sec=document.getElementById('donate');
+  if(sec)sec.style.display=visible?'block':'none';
+  const cb=document.getElementById('mDonateVisible');
+  if(cb)cb.checked=visible;
+}
+async function saveDonateVisibility(){
+  if(!requireAuthenticated())return;
+  const visible=!!document.getElementById('mDonateVisible')?.checked;
+  const d={...(settings.donationData||finalGet('mbus_donation_final',{})),visible};
+  settings.donationData=d;
+  settings.donateVisible=visible;
+  finalStore('mbus_donation_final',d);
+  const ok=await saveRemoteExtras('donation',d);
+  renderDonateVisibility();
+  toast(ok?(visible?'✓ सहयोग section public page पर ON हो गया।':'✓ सहयोग section public page से OFF हो गया।'):'⚠️ Visibility local save हुई।');
+}
+
+/* ===== FEEDBACK ===== */
+async function sendMessage(e){
+  e.preventDefault();
+  const name=(document.getElementById('fbName')?.value||'').trim();
+  const phone=(document.getElementById('fbPhone')?.value||'').trim();
+  const email=(document.getElementById('fbEmail')?.value||'').trim();
+  const message=(document.getElementById('fbMessage')?.value||'').trim();
+  if(!name||!phone||!message){toast('❌ नाम, मोबाइल और संदेश आवश्यक हैं।');return}
+  const entry={id:Date.now()+'_'+Math.random().toString(36).slice(2,8),name,phone,email,message,createdAt:new Date().toISOString()};
+  try{
+    const list=finalGet('mbus_feedback_list',[]);
+    list.unshift(entry);
+    finalStore('mbus_feedback_list',list.slice(0,200));
+    // also push into site_settings extras
+    let remote=finalGet('mbus_feedback_remote',[]);
+    try{
+      const {data}=await sb.from('site_settings').select('settings').eq('id',1).maybeSingle();
+      remote=(data?.settings&&data.settings.feedbackList)||remote||[];
+    }catch(_){}
+    remote=[entry].concat(Array.isArray(remote)?remote:[]).slice(0,200);
+    finalStore('mbus_feedback_remote',remote);
+    await saveRemoteExtras('feedbackList',remote);
+    document.getElementById('fbName').value='';
+    document.getElementById('fbPhone').value='';
+    document.getElementById('fbEmail').value='';
+    document.getElementById('fbMessage').value='';
+    toast('✓ धन्यवाद! आपका संदेश प्राप्त हो गया।');
+  }catch(err){
+    console.error(err);
+    toast('✓ संदेश local save हो गया। (online sync बाद में)');
+  }
+}
+async function loadFeedbackMessages(){
+  const box=document.getElementById('feedbackList');if(!box)return;
+  box.innerHTML='<div class="user-id-empty">⏳ Feedback load हो रही है…</div>';
+  let list=[];
+  try{
+    const {data}=await sb.from('site_settings').select('settings').eq('id',1).maybeSingle();
+    if(data?.settings?.feedbackList)list=data.settings.feedbackList;
+  }catch(e){console.warn(e)}
+  if(!list.length)list=finalGet('mbus_feedback_list',[]);
+  if(!list.length)list=finalGet('mbus_feedback_remote',[]);
+  box.innerHTML='';
+  if(!list.length){box.innerHTML='<div class="user-id-empty">अभी कोई feedback / संदेश नहीं है।</div>';return}
+  list.forEach(f=>{
+    const div=document.createElement('div');
+    div.className='user-id-card';
+    const when=f.createdAt?new Date(f.createdAt).toLocaleString('hi-IN'):'—';
+    div.innerHTML=`<div class="user-id-meta"><h4>👤 ${escapeHtml(f.name||'—')}</h4>
+      <small>📱 ${escapeHtml(f.phone||'—')}</small>
+      <small>📧 ${escapeHtml(f.email||'—')}</small>
+      <small>🗓️ ${escapeHtml(when)}</small>
+      <p style="margin-top:10px;line-height:1.6">${escapeHtml(f.message||'')}</p></div>`;
+    box.appendChild(div);
+  });
+}
+
+/* ===== VIDEO AUTO PLAY / PAUSE ON VISIBILITY ===== */
+let videoObserver=null;
+function setupVideoAutoplay(){
+  const videos=[...document.querySelectorAll('#public-videos video, #videoGalleryTrack video')];
+  if(!videos.length)return;
+  if(videoObserver)videoObserver.disconnect();
+  videoObserver=new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      const v=entry.target;
+      if(entry.isIntersecting && entry.intersectionRatio>=0.55){
+        // pause others
+        videos.forEach(o=>{if(o!==v){try{o.pause()}catch(_){}}});
+        try{v.muted=true;const p=v.play();if(p&&p.catch)p.catch(()=>{})}catch(_){}
+      }else{
+        try{v.pause()}catch(_){}
+      }
+    });
+  },{threshold:[0.25,0.55,0.75]});
+  videos.forEach(v=>{
+    v.setAttribute('playsinline','');
+    v.muted=true;
+    videoObserver.observe(v);
+  });
+}
+
+
 
 /* ===== INIT ===== */
 async function init(){
@@ -1712,6 +1925,9 @@ async function init(){
  swipe(document.querySelector('[data-gallery-slider="four"]'),d=>galleryMove('four',d));
  swipe(document.querySelector('[data-gallery-slider="video"]'),d=>galleryMove('video',d));
  setInterval(()=>bannerMove('hero',1),4500);setInterval(()=>bannerMove('lower',1),4500);setInterval(()=>galleryMove('four',1),4000);
+ setTimeout(setupVideoAutoplay,800);
+ renderPublicMap();
+ renderDonateVisibility();
 }
 
 /* ===== ANDROID FILE PICKER / MANAGEMENT PANEL STAY-OPEN FIX ===== */
