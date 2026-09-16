@@ -154,9 +154,9 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 
 /* FINAL DEMO FIXES */
 .hero-banner-slider,.lower-banner-slider{position:relative;width:100%;overflow:hidden;border:1px solid #6d4710;border-radius:22px;background:#18070a;box-shadow:0 15px 50px #0008}
-.hero-banner-slider{min-height:360px}.lower-banner-slider{min-height:260px}
+.hero-banner-slider{min-height:0;aspect-ratio:16/9}.lower-banner-slider{min-height:0;aspect-ratio:16/9}
 .banner-track{display:flex;transition:transform .45s ease;touch-action:pan-y}
-.banner-slide{min-width:100%;position:relative}.banner-slide img{width:100%;height:100%;min-height:360px;object-fit:cover;display:block}.lower-banner-slider .banner-slide img{min-height:260px}
+.banner-slide{min-width:100%;position:relative;aspect-ratio:16/9}.banner-slide img{width:100%;height:100%;min-height:0;object-fit:contain;object-position:center;display:block}.lower-banner-slider .banner-slide img{min-height:0}
 .slider-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;border:1px solid #ffd966;background:#160b00;color:#ffd966;width:44px;height:44px;border-radius:50%;font-size:22px;font-weight:900;cursor:pointer}.slider-arrow.prev{left:12px}.slider-arrow.next{right:12px}
 .slider-dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:4}.slider-dot{width:9px;height:9px;border-radius:50%;border:1px solid #ffd966;background:#2a1014}.slider-dot.active{background:#ffd966}
 .gallery-main-stack{display:flex;flex-direction:column;gap:24px}.gallery-photo-frame{height:auto;border:0;border-radius:0;overflow:hidden;background:transparent;position:relative}.gallery-photo-frame img{width:100%;height:100%;object-fit:cover}.gallery-label{position:absolute;bottom:0;left:0;right:0;padding:13px;background:linear-gradient(transparent,#000c);font-weight:800;color:#fff}
@@ -222,13 +222,13 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 .manager-card>input,.manager-card>textarea,.manager-card>select{margin-top:7px}
 @media(max-width:700px){
   .hero-wrap{width:calc(100% - 18px)}
-  .hero-banner-slider{height:250px!important}
-  .hero-banner-slider .banner-slide img{height:250px!important}
+  .hero-banner-slider{height:auto!important;min-height:0!important;aspect-ratio:16/9!important}
+  .hero-banner-slider .banner-slide img{height:100%!important;min-height:0!important;object-fit:contain!important}
   .hero-text-below{padding-bottom:28px}
   .hero-text-below h1{font-size:clamp(34px,9vw,58px)}
   .hero-text-below p{font-size:16px}
-  .lower-banner-slider{height:auto!important}
-  .lower-banner-slider .banner-slide img{height:100%!important}
+  .lower-banner-slider{height:auto!important;min-height:0!important;aspect-ratio:16/9!important}
+  .lower-banner-slider .banner-slide img{height:100%!important;min-height:0!important;object-fit:contain!important}
   .gallery-photo-frame{height:auto!important;aspect-ratio:2/3!important}
   .gallery-slider{height:auto!important}
   .media-admin-grid,.permission-grid{grid-template-columns:1fr}
@@ -2343,4 +2343,59 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important}
 }
 </style>
 
+
+<style id="banner-no-crop-fix">
+/* Banners: full image visible, no cut on phone or desktop */
+.hero-banner-slider,
+.lower-banner-slider{
+  width:100%!important;
+  max-width:100vw!important;
+  height:auto!important;
+  min-height:0!important;
+  aspect-ratio:16/9!important;
+  overflow:hidden!important;
+  background:#120608!important;
+}
+.hero-banner-slider .banner-track,
+.lower-banner-slider .banner-track{
+  height:100%!important;
+  align-items:stretch!important;
+}
+.hero-banner-slider .banner-slide,
+.lower-banner-slider .banner-slide{
+  min-width:100%!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  aspect-ratio:16/9!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#120608!important;
+}
+.hero-banner-slider .banner-slide img,
+.lower-banner-slider .banner-slide img{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  display:block!important;
+}
+@media(max-width:700px){
+  .hero-banner-slider,
+  .lower-banner-slider{
+    height:auto!important;
+    min-height:0!important;
+    aspect-ratio:16/9!important;
+  }
+  .hero-banner-slider .banner-slide img,
+  .lower-banner-slider .banner-slide img{
+    height:100%!important;
+    min-height:0!important;
+    object-fit:contain!important;
+  }
+}
+</style>
 </html>
