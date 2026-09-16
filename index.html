@@ -650,6 +650,32 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
   }
 }
 </style>
+
+<style id="hide-video-chrome">
+#public-videos video,
+#videoGalleryTrack video{
+  pointer-events:auto;
+}
+#public-videos video::-webkit-media-controls,
+#public-videos video::-webkit-media-controls-enclosure,
+#public-videos video::-webkit-media-controls-panel,
+#public-videos video::-webkit-media-controls-play-button,
+#public-videos video::-webkit-media-controls-start-playback-button,
+#public-videos video::-webkit-media-controls-timeline,
+#public-videos video::-webkit-media-controls-current-time-display,
+#public-videos video::-webkit-media-controls-time-remaining-display,
+#public-videos video::-webkit-media-controls-mute-button,
+#public-videos video::-webkit-media-controls-volume-slider,
+#public-videos video::-webkit-media-controls-fullscreen-button,
+#videoGalleryTrack video::-webkit-media-controls,
+#videoGalleryTrack video::-webkit-media-controls-enclosure,
+#videoGalleryTrack video::-webkit-media-controls-panel{
+  display:none!important;
+  -webkit-appearance:none!important;
+  opacity:0!important;
+  width:0!important;height:0!important;
+}
+</style>
 </head>
 <body>
 <header><div class="nav">
@@ -765,9 +791,9 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
       <div class="gallery-block">
         <div class="gallery-slider" data-gallery-slider="video">
           <div class="gallery-video-track" id="videoGalleryTrack">
-            <div class="gallery-video-slide video-landscape"><video id="galleryVideo1" controls playsinline preload="metadata"></video></div>
-            <div class="gallery-video-slide video-portrait"><video id="galleryVideo2" controls playsinline preload="metadata"></video></div>
-            <div class="gallery-video-slide video-portrait"><video id="galleryVideo3" controls playsinline preload="metadata"></video></div>
+            <div class="gallery-video-slide video-landscape"><video id="galleryVideo1" playsinline webkit-playsinline preload="metadata" controlslist="nodownload noplaybackrate noremoteplayback" disablePictureInPicture></video></div>
+            <div class="gallery-video-slide video-portrait"><video id="galleryVideo2" playsinline webkit-playsinline preload="metadata" controlslist="nodownload noplaybackrate noremoteplayback" disablePictureInPicture></video></div>
+            <div class="gallery-video-slide video-portrait"><video id="galleryVideo3" playsinline webkit-playsinline preload="metadata" controlslist="nodownload noplaybackrate noremoteplayback" disablePictureInPicture></video></div>
           </div>
           <button class="slider-arrow prev" type="button" onclick="galleryMove('video',-1)">‹</button>
           <button class="slider-arrow next" type="button" onclick="galleryMove('video',1)">›</button>
@@ -881,9 +907,12 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
       <div class="manager-card" id="cardMap" data-access="map"><h3>📍 Google Map</h3><label>Google Maps URL</label><input id="mMap" class="owner-input" placeholder="Google Maps share/embed link"><button onclick="saveSettings()">💾 Save Google Map</button><p class="access-help">Public page पर iframe map + “Open in Google Maps” button दिखेगा।</p></div>
       <div class="manager-card" id="cardFeedback" data-access="feedback"><h3>📨 Feedback / संदेश</h3><p>Website से भेजे गए messages यहाँ दिखेंगे।</p><div id="feedbackList"><div class="user-id-empty">⏳ Feedback load हो रही है…</div></div><button type="button" onclick="loadFeedbackMessages()">🔄 Refresh</button></div>
       <div class="manager-card" id="cardDonateToggle" data-access="prasad"><h3>💝 सहयोग Section ON/OFF</h3><p>Public website पर Donate / सहयोग section default बंद रहता है। जब QR / UPI तैयार हो तब चालू करें।</p><label style="display:flex;align-items:center;gap:10px;margin:12px 0"><input type="checkbox" id="mDonateVisible" style="transform:scale(1.3)"> Public page पर सहयोग section दिखाएँ</label><button onclick="saveDonateVisibility()">💾 Save Visibility</button></div>
-      <div class="manager-card" id="cardRegistrationIds" data-access="registrationIds"><h3>🪪 Registration ID View</h3><p>सभी registered users की professional ID cards यहाँ केवल view की जा सकती हैं।</p><div id="registeredUsersList"><div class="user-id-empty">⏳ Registered users load हो रहे हैं…</div></div></div>
-      <div class="manager-card" id="cardRegistrationRequests" data-access="registrationRequests" data-owner-only="true"><h3>📨 New Registration Requests</h3><p>नई registration को approve/reject करें और हर user की अलग permissions दें।</p><div id="registrationRequestsList"><div class="user-id-empty">⏳ New requests load हो रही हैं…</div></div></div>
-      <div class="manager-card" id="cardApprovedTeam" data-access="approvedTeam" data-owner-only="true"><h3>✅ Approved Team Members</h3><p>Owner द्वारा approve किए गए team members की Team ID, name और number यहाँ दिखेंगे।</p><div id="approvedTeamList"><div class="user-id-empty">⏳ Approved team load हो रही है…</div></div></div>
+      <div class="manager-card" id="cardRegistrationIds" data-access="registrationIds"><h3>🪪 Registration ID View</h3><p>यहाँ केवल Member ID और login details दिखती हैं (view only)।</p><div id="registeredUsersList"><div class="user-id-empty">⏳ Registered users load हो रहे हैं…</div></div></div>
+      <div class="manager-card" id="cardRegistrationRequests" data-access="registrationRequests" data-owner-only="true"><h3>📨 New Registration Requests</h3><p>सिर्फ नई pending requests। यहाँ केवल Approve / Reject / Pending — कोई permission checkbox नहीं।</p><div id="registrationRequestsList"><div class="user-id-empty">⏳ New requests load हो रही हैं…</div></div></div>
+      <div class="manager-card" id="cardPendingRejected" data-access="pendingRejected" data-owner-only="true"><h3>🟡 Pending / Rejected</h3><p>Pending या Reject किए गए members। यहाँ से status बाद में बदल सकते हो।</p><div id="pendingRejectedList"><div class="user-id-empty">⏳ List load हो रही है…</div></div></div>
+      <div class="manager-card" id="cardApprovedTeam" data-access="approvedTeam" data-owner-only="true"><h3>✅ Approved Team Members</h3><p>Approve हुए members — केवल Team ID और login details।</p><div id="approvedTeamList"><div class="user-id-empty">⏳ Approved team load हो रही है…</div></div></div>
+      <div class="manager-card" id="cardTeamAccess" data-access="teamAccess" data-owner-only="true"><h3>🔑 Team Access</h3><p>Approved member को permissions assign / update करें।</p><div id="teamAccessList"><div class="user-id-empty">⏳ Approved members load हो रहे हैं…</div></div></div>
+      <div class="manager-card" id="cardAccessPermissions" data-access="accessPermissions" data-owner-only="true"><h3>🛡️ Access Permissions</h3><p>हर member की मौजूदा permissions देखें और बदलें।</p><div id="accessPermissionsList"><div class="user-id-empty">⏳ Permissions load हो रही हैं…</div></div></div>
     </div>
   </div>
 </div>
@@ -928,9 +957,9 @@ const defaults={
 let settings={...defaults};
 let currentAuthUser=null;
 let explicitManagementLogin=false;
-const ACCESS_KEYS=["banners","utsav","aarti","committee","prasad","live","video","creator","text","seo","gallery","team","social","logo","contact","map","feedback","registrationIds","registrationRequests","approvedTeam"];
+const ACCESS_KEYS=["banners","utsav","aarti","committee","prasad","live","video","creator","text","seo","gallery","team","social","logo","contact","map","feedback","registrationIds","registrationRequests","approvedTeam","teamAccess","accessPermissions","pendingRejected"];
 const MENU_ITEMS={
- banners:"🖼️ Banners",utsav:"🌺 उत्सव जानकारी",aarti:"🪔 आरती / पूजा",committee:"👑 पदाधिकारी",prasad:"🍚 प्रसाद / Donation",live:"🔴 Live Aarti",video:"🎬 Video",creator:"👨‍💻 Website Creator",text:"✏️ Website Text",seo:"🔍 Google SEO Description",gallery:"📸 Gallery",team:"👥 Team Members",social:"📱 Social Media",logo:"🎨 Logo",contact:"📞 Contact",map:"📍 Google Map",feedback:"📨 Feedback / संदेश",registrationIds:"🪪 Registration ID View",registrationRequests:"📨 New Registration Requests",approvedTeam:"✅ Approved Team Members"};
+ banners:"🖼️ Banners",utsav:"🌺 उत्सव जानकारी",aarti:"🪔 आरती / पूजा",committee:"👑 पदाधिकारी",prasad:"🍚 प्रसाद / Donation",live:"🔴 Live Aarti",video:"🎬 Video",creator:"👨‍💻 Website Creator",text:"✏️ Website Text",seo:"🔍 Google SEO Description",gallery:"📸 Gallery",team:"👥 Team Members",social:"📱 Social Media",logo:"🎨 Logo",contact:"📞 Contact",map:"📍 Google Map",feedback:"📨 Feedback / संदेश",registrationIds:"🪪 Registration ID View",registrationRequests:"📨 New Registration Requests",approvedTeam:"✅ Approved Team Members",teamAccess:"🔑 Team Access",accessPermissions:"🛡️ Access Permissions",pendingRejected:"🟡 Pending / Rejected"};
 const OWNER_EMAIL="kubersahu7807@gmail.com";
 
 function toast(msg){
@@ -1438,23 +1467,69 @@ async function ensureUserProfile(user){
  }catch(e){console.warn('Profile create/sync failed',e);return null}
 }
 
-function buildUserIdCard(u, controls=false){
- const perms=normalizePerms(u.permissions),created=u.created_at?new Date(u.created_at).toLocaleString('hi-IN',{dateStyle:'medium',timeStyle:'short'}):'—',idNo=u.team_id||makeTeamId((u.id||'')+(u.email||''));
+function buildUserIdCard(u, mode='view'){
+ // mode: 'view' | 'status' | 'perms'
+ const perms=normalizePerms(u.permissions);
+ const created=u.created_at?new Date(u.created_at).toLocaleString('hi-IN',{dateStyle:'medium',timeStyle:'short'}):'—';
+ const idNo=u.team_id||makeTeamId((u.id||'')+(u.email||''));
  const photo=u.avatar_url?`<img class="user-id-avatar" src="${String(u.avatar_url).replace(/"/g,'&quot;')}" alt="Profile">`:'<div class="user-id-placeholder">👤</div>';
- const status=u.status||'pending';const card=document.createElement('div');card.className='user-id-card';
- const statusLabel=status==='approved'?'✅ Approved':status==='rejected'?'❌ Rejected':'🟡 Pending Approval';
- const actionHtml=controls?`<b>Owner की Permission:</b><div class="user-id-perms">${ACCESS_KEYS.map(k=>`<label><input type="checkbox" data-user-perm="${k}" ${perms[k]?'checked':''}> ${escapeHtml(permLabel(k))}</label>`).join('')}</div><div class="user-id-actions"><button type="button" data-user-action="approve">✅ Approve / Update Permissions</button><button type="button" data-user-action="reject">❌ Reject</button><button type="button" data-user-action="pending" style="background:#8a5a00">🟡 Set Pending</button></div>`:`<div class="user-id-view-perms"><b>Assigned:</b> ${ACCESS_KEYS.filter(k=>perms[k]).map(k=>escapeHtml(permLabel(k))).join(' • ')||'No management access assigned'}</div>`;
- card.innerHTML=`<div class="user-id-head">${photo}<div class="user-id-meta"><h4>${escapeHtml(u.full_name||'New User')}</h4><small>📧 ${escapeHtml(u.email||'—')}</small><small>📱 ${escapeHtml(u.phone||'—')}</small><small>🎂 ${escapeHtml(u.dob||'—')}</small><small>🗓️ Signup: ${escapeHtml(created)}</small><span class="user-id-number">ID: ${idNo}</span></div></div><div class="user-id-status ${status}">Status: ${statusLabel}</div>${actionHtml}`;
- if(controls){
-  const a=card.querySelector('[data-user-action="approve"]');
-  const r=card.querySelector('[data-user-action="reject"]');
-  const p=card.querySelector('[data-user-action="pending"]');
-  if(a)a.onclick=()=>updateUserApproval(u.id,'approved',card);
-  if(r)r.onclick=()=>updateUserApproval(u.id,'rejected',card);
-  if(p)p.onclick=()=>updateUserApproval(u.id,'pending',card);
+ const status=u.status||'pending';
+ const statusLabel=status==='approved'?'✅ Approved':status==='rejected'?'❌ Rejected':'🟡 Pending';
+ const card=document.createElement('div');card.className='user-id-card';
+
+ if(mode==='view'){
+  // Registration ID View — only identity / login details
+  card.innerHTML=`<div class="user-id-head">${photo}<div class="user-id-meta">
+    <h4>${escapeHtml(u.full_name||'Member')}</h4>
+    <span class="user-id-number">ID: ${escapeHtml(idNo)}</span>
+    <small>📧 ${escapeHtml(u.email||'—')}</small>
+    <small>📱 ${escapeHtml(u.phone||'—')}</small>
+    <small>🎂 ${escapeHtml(u.dob||'—')}</small>
+    <small>🗓️ Signup: ${escapeHtml(created)}</small>
+    <small>Status: ${statusLabel}</small>
+  </div></div>`;
+  return card;
  }
+
+ if(mode==='status'){
+  // New requests / Pending-Rejected — only 3 status buttons, no permission checkboxes
+  card.innerHTML=`<div class="user-id-head">${photo}<div class="user-id-meta">
+    <h4>${escapeHtml(u.full_name||'New User')}</h4>
+    <span class="user-id-number">ID: ${escapeHtml(idNo)}</span>
+    <small>📧 ${escapeHtml(u.email||'—')}</small>
+    <small>📱 ${escapeHtml(u.phone||'—')}</small>
+    <small>🗓️ ${escapeHtml(created)}</small>
+  </div></div>
+  <div class="user-id-status ${status}">Status: ${statusLabel}</div>
+  <div class="user-id-actions">
+    <button type="button" data-user-action="approve">✅ Approve</button>
+    <button type="button" data-user-action="reject">❌ Reject</button>
+    <button type="button" data-user-action="pending" style="background:#8a5a00">🟡 Pending</button>
+  </div>`;
+  card.querySelector('[data-user-action="approve"]').onclick=()=>updateUserApproval(u.id,'approved',null);
+  card.querySelector('[data-user-action="reject"]').onclick=()=>updateUserApproval(u.id,'rejected',null);
+  card.querySelector('[data-user-action="pending"]').onclick=()=>updateUserApproval(u.id,'pending',null);
+  return card;
+ }
+
+ // mode === 'perms' — Team Access / Access Permissions
+ card.innerHTML=`<div class="user-id-head">${photo}<div class="user-id-meta">
+   <h4>${escapeHtml(u.full_name||'Member')}</h4>
+   <span class="user-id-number">ID: ${escapeHtml(idNo)}</span>
+   <small>📧 ${escapeHtml(u.email||'—')}</small>
+   <small>📱 ${escapeHtml(u.phone||'—')}</small>
+ </div></div>
+ <div class="user-id-status approved">Status: ✅ Approved</div>
+ <b>Permissions:</b>
+ <div class="user-id-perms">${ACCESS_KEYS.map(k=>`<label><input type="checkbox" data-user-perm="${k}" ${perms[k]?'checked':''}> ${escapeHtml(permLabel(k))}</label>`).join('')}</div>
+ <div class="user-id-actions">
+   <button type="button" data-user-action="save-perms">💾 Save Permissions</button>
+ </div>`;
+ card.querySelector('[data-user-action="save-perms"]').onclick=()=>updateUserApproval(u.id,'approved',card);
  return card;
 }
+
+
 async function loadRegisteredUsers(){
  const viewBox=document.getElementById('registeredUsersList'),reqBox=document.getElementById('registrationRequestsList');
  try{
@@ -1471,14 +1546,16 @@ async function loadRegisteredUsers(){
   if(viewBox)viewBox.innerHTML='';if(reqBox)reqBox.innerHTML='';
   if(!data?.length){if(viewBox)viewBox.innerHTML='<div class="user-id-empty">अभी कोई registered user नहीं मिला।</div>';if(reqBox)reqBox.innerHTML='<div class="user-id-empty">अभी कोई new registration request नहीं है।</div>';loadApprovedTeamMembers();return}
   data.forEach(u=>{
-    // Registration ID View: all users, with controls so status can be changed anytime
-    if(viewBox)viewBox.appendChild(buildUserIdCard(u,true));
-    // New requests: pending + rejected (so Owner can re-approve after mistake)
     const st=u.status||'pending';
-    if(reqBox&&(st==='pending'||st==='rejected'))reqBox.appendChild(buildUserIdCard(u,true));
+    // Registration ID View — view only
+    if(viewBox)viewBox.appendChild(buildUserIdCard(u,'view'));
+    // New Registration Requests — ONLY pending
+    if(reqBox&&st==='pending')reqBox.appendChild(buildUserIdCard(u,'status'));
   });
-  if(reqBox&&!reqBox.children.length)reqBox.innerHTML='<div class="user-id-empty">अभी कोई pending / rejected registration request नहीं है।</div>';
+  if(reqBox&&!reqBox.children.length)reqBox.innerHTML='<div class="user-id-empty">अभी कोई नई registration request नहीं है।</div>';
   loadApprovedTeamMembers();
+  loadPendingRejectedList(data);
+  loadTeamAccessLists(data);
  }catch(e){
   console.error(e);
   const detail=escapeHtml(e?.message||String(e));
@@ -1487,14 +1564,19 @@ async function loadRegisteredUsers(){
  }
 }
 function buildApprovedTeamCard(u){
+ // Sirf Team ID + login details — kuch aur nahi
  const id=u.team_id||makeTeamId((u.id||'')+(u.email||''));
+ const created=u.created_at?new Date(u.created_at).toLocaleString('hi-IN',{dateStyle:'medium',timeStyle:'short'}):'—';
+ const photo=u.avatar_url?`<img class="user-id-avatar" src="${String(u.avatar_url).replace(/"/g,'&quot;')}" alt="Profile">`:'<div class="user-id-placeholder">👤</div>';
  const card=document.createElement('div');card.className='user-id-card';
- card.innerHTML=`<div class="user-id-head"><div class="user-id-meta">
-   <h4>🪪 ${escapeHtml(id)}</h4>
-   <small>👤 ${escapeHtml(u.full_name||'Team Member')}</small>
-   <small>📱 ${escapeHtml(u.phone||'—')}</small>
+ card.innerHTML=`<div class="user-id-head">${photo}<div class="user-id-meta">
+   <h4>${escapeHtml(u.full_name||'Member')}</h4>
+   <span class="user-id-number">Team ID: ${escapeHtml(id)}</span>
    <small>📧 ${escapeHtml(u.email||'—')}</small>
- </div></div><div class="user-id-status approved">Status: ✅ Approved Team Member</div>`;
+   <small>📱 ${escapeHtml(u.phone||'—')}</small>
+   <small>🎂 ${escapeHtml(u.dob||'—')}</small>
+   <small>🗓️ Login/Signup: ${escapeHtml(created)}</small>
+ </div></div>`;
  return card;
 }
 async function loadApprovedTeamMembers(){
@@ -1515,14 +1597,55 @@ async function loadApprovedTeamMembers(){
  }
 }
 
+
+function loadPendingRejectedList(allData){
+  const box=document.getElementById('pendingRejectedList');if(!box)return;
+  const list=(allData||[]).filter(u=>{const st=u.status||'pending';return st==='pending'||st==='rejected'});
+  box.innerHTML='';
+  if(!list.length){box.innerHTML='<div class="user-id-empty">अभी कोई pending / rejected member नहीं है।</div>';return}
+  list.forEach(u=>box.appendChild(buildUserIdCard(u,'status')));
+}
+function loadTeamAccessLists(allData){
+  const accessBox=document.getElementById('teamAccessList');
+  const permBox=document.getElementById('accessPermissionsList');
+  const approved=(allData||[]).filter(u=>(u.status||'')==='approved');
+  if(accessBox){
+    accessBox.innerHTML='';
+    if(!approved.length)accessBox.innerHTML='<div class="user-id-empty">अभी कोई approved member नहीं — पहले New Request से Approve करें।</div>';
+    else approved.forEach(u=>accessBox.appendChild(buildUserIdCard(u,'perms')));
+  }
+  if(permBox){
+    permBox.innerHTML='';
+    if(!approved.length)permBox.innerHTML='<div class="user-id-empty">अभी कोई approved member नहीं।</div>';
+    else approved.forEach(u=>permBox.appendChild(buildUserIdCard(u,'perms')));
+  }
+}
+async function refreshAllUserPanels(){
+  // shared reload
+  const viewBox=document.getElementById('registeredUsersList');
+  try{
+    const {data:sess}=await sb.auth.getSession();
+    if(!sess?.session)return;
+    let {data,error}=await sb.from('user_profiles').select('*').order('created_at',{ascending:false});
+    if(error)({data,error}=await sb.from('user_profiles').select('*'));
+    if(error||!data)return;
+    loadPendingRejectedList(data);
+    loadTeamAccessLists(data);
+  }catch(e){console.warn(e)}
+}
+
 function escapeHtml(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function permLabel(k){return MENU_ITEMS[k]||k}
 async function updateUserApproval(id,status,card){
  // Only management access — NEVER auto-add to public Team Members section
- const permissions=defaultMemberPermissions();
- if(card)card.querySelectorAll('[data-user-perm]').forEach(cb=>permissions[cb.dataset.userPerm]=!!cb.checked);
  try{
   const {data:userRow,error}=await sb.from('user_profiles').select('*').eq('id',id).maybeSingle();if(error)throw error;
+  let permissions=normalizePerms(userRow&&userRow.permissions);
+  if(card){
+    // saving from Team Access / Access Permissions panel
+    permissions=defaultMemberPermissions();
+    card.querySelectorAll('[data-user-perm]').forEach(cb=>permissions[cb.dataset.userPerm]=!!cb.checked);
+  }
   const teamId=(userRow&&userRow.team_id)||makeTeamId((id||'')+((userRow&&userRow.email)||''));
   const {error:upErr}=await sb.from('user_profiles').update({status,permissions,team_id:teamId}).eq('id',id);if(upErr)throw upErr;
   // Remove any auto-added public cards that were created by older code
@@ -1542,9 +1665,10 @@ async function updateUserApproval(id,status,card){
      renderTeamV3();
    }
   }
-  toast(status==='approved'?'✓ Approve हो गया। Management access मिल गया (public Team section में auto photo नहीं लगेगी)।':'✓ Reject हो गया। Management access हटा दिया गया।');
+  toast(status==='approved'?'✓ Status: Approved':'✓ Status: '+status);
   loadRegisteredUsers();
   loadApprovedTeamMembers();
+  refreshAllUserPanels();
  }catch(e){console.error(e);toast('❌ User permission save नहीं हुई। RLS/SQL check करें।')}
 }
 async function applyManagementAccess(user){
@@ -1953,26 +2077,100 @@ async function loadFeedbackMessages(){
 /* ===== VIDEO AUTO PLAY / PAUSE ON VISIBILITY ===== */
 let videoObserver=null;
 function setupVideoAutoplay(){
-  const videos=[...document.querySelectorAll('#public-videos video, #videoGalleryTrack video')];
-  if(!videos.length)return;
-  if(videoObserver)videoObserver.disconnect();
-  videoObserver=new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      const v=entry.target;
-      if(entry.isIntersecting && entry.intersectionRatio>=0.55){
-        // pause others
-        videos.forEach(o=>{if(o!==v){try{o.pause()}catch(_){}}});
-        try{v.muted=true;const p=v.play();if(p&&p.catch)p.catch(()=>{})}catch(_){}
-      }else{
-        try{v.pause()}catch(_){}
+  const videos=[...document.querySelectorAll('#public-videos video, #videoGalleryTrack video')].filter(v=>v && (v.src||v.querySelector('source')));
+  const allVideos=[...document.querySelectorAll('#public-videos video, #videoGalleryTrack video')];
+  if(!allVideos.length)return;
+  if(videoObserver){try{videoObserver.disconnect()}catch(_){}}
+
+  function prep(v){
+    v.removeAttribute('controls');
+    v.setAttribute('playsinline','');
+    v.setAttribute('webkit-playsinline','');
+    v.setAttribute('controlslist','nodownload noplaybackrate noremoteplayback');
+    try{v.disablePictureInPicture=true}catch(_){}
+    v.playsInline=true;
+    v.loop=true;
+    v.preload='auto';
+    // start unmuted intent — browser may force mute until gesture
+    v.volume=1;
+  }
+  allVideos.forEach(v=>{
+    prep(v);
+    v.addEventListener('contextmenu',e=>e.preventDefault());
+  });
+
+  async function playWithSound(v){
+    if(!v)return;
+    // pause every other video first
+    allVideos.forEach(o=>{
+      if(o!==v){
+        try{o.pause()}catch(_){}
+        try{o.muted=true}catch(_){}
       }
     });
-  },{threshold:[0.25,0.55,0.75]});
-  videos.forEach(v=>{
-    v.setAttribute('playsinline','');
-    v.muted=true;
-    videoObserver.observe(v);
-  });
+    try{
+      v.muted=false;
+      v.volume=1;
+      await v.play();
+    }catch(err){
+      // Autoplay with sound blocked — play muted, then unmute after next user gesture
+      try{
+        v.muted=true;
+        await v.play();
+      }catch(_){}
+      const unmute=()=>{
+        try{
+          if(!v.paused){v.muted=false;v.volume=1}
+        }catch(_){}
+        document.removeEventListener('touchstart',unmute);
+        document.removeEventListener('click',unmute);
+        document.removeEventListener('scroll',unmute);
+      };
+      document.addEventListener('touchstart',unmute,{passive:true});
+      document.addEventListener('click',unmute);
+      document.addEventListener('scroll',unmute,{passive:true});
+    }
+  }
+  function pauseVideo(v){
+    try{v.pause()}catch(_){}
+    try{v.muted=true}catch(_){}
+  }
+
+  videoObserver=new IntersectionObserver((entries)=>{
+    // Pick the most visible intersecting video
+    let best=null,bestRatio=0;
+    entries.forEach(entry=>{
+      if(entry.isIntersecting && entry.intersectionRatio>bestRatio){
+        best=entry.target;bestRatio=entry.intersectionRatio;
+      }
+    });
+    // Also pause videos that left the viewport
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting || entry.intersectionRatio<0.35){
+        pauseVideo(entry.target);
+      }
+    });
+    if(best && bestRatio>=0.35){
+      playWithSound(best);
+    }
+  },{threshold:[0,0.25,0.35,0.5,0.65,0.8,1], rootMargin:'0px'});
+
+  allVideos.forEach(v=>videoObserver.observe(v));
+
+  // Global unlock: first interaction allows sound for currently visible video
+  if(!window._mbusVideoUnlock){
+    window._mbusVideoUnlock=true;
+    const unlock=()=>{
+      allVideos.forEach(v=>{
+        if(!v.paused){
+          try{v.muted=false;v.volume=1}catch(_){}
+        }
+      });
+    };
+    document.addEventListener('touchstart',unlock,{passive:true});
+    document.addEventListener('click',unlock);
+    document.addEventListener('scroll',unlock,{passive:true});
+  }
 }
 
 
