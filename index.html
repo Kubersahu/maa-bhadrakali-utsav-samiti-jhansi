@@ -1981,70 +1981,70 @@ function toEmbedMapUrl(url){
   if(!url)return '';
   let u=String(url).trim();
   if(!u)return '';
-  // already proper embed URL
+  if(/maps\.app\.goo\.gl\/9tnr6q14TzaDjryA9/i.test(u) || /9tnr6q14TzaDjryA9/i.test(u)){
+    return 'https://maps.google.com/maps?q='+encodeURIComponent('MAA BHADRAKALI UTSAV SAMITI, Khushipura, Jhansi, Uttar Pradesh 284002')+'&z=17&hl=hi&output=embed';
+  }
   if(/google\.[^/]+\/maps\/embed(\?|\/)/i.test(u)){
-    // keep pb= embed, strip broken api key if any
     try{
       const p=new URL(u);
       if(p.searchParams.get('pb')) return 'https://www.google.com/maps/embed?pb='+p.searchParams.get('pb');
     }catch(_){}
     return u;
   }
-  // coords from @lat,lng,zoom
   let m=u.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
   if(m){
-    return 'https://maps.google.com/maps?q='+m[1]+','+m[2]+'&z=16&hl=hi&output=embed';
+    return 'https://maps.google.com/maps?q='+m[1]+','+m[2]+'&z=17&hl=hi&output=embed';
   }
-  // /maps/place/Place+Name/
   m=u.match(/\/maps\/place\/([^/@?\s]+)/i);
   if(m){
     let place='';
     try{place=decodeURIComponent(m[1].replace(/\+/g,' '));}catch(_){place=m[1].replace(/\+/g,' ');}
-    return 'https://maps.google.com/maps?q='+encodeURIComponent(place)+'&z=16&hl=hi&output=embed';
+    if(/MAA\+BHADRAKALI|BHADRAKALI\+UTSAV|BHADRAKALI UTSAV/i.test(u)){
+      place='MAA BHADRAKALI UTSAV SAMITI, Khushipura, Jhansi, Uttar Pradesh 284002';
+    }
+    return 'https://maps.google.com/maps?q='+encodeURIComponent(place)+'&z=17&hl=hi&output=embed';
   }
-  // /maps/search/query
   m=u.match(/\/maps\/search\/([^/?\s]+)/i);
   if(m){
     let q='';
     try{q=decodeURIComponent(m[1].replace(/\+/g,' '));}catch(_){q=m[1];}
-    return 'https://maps.google.com/maps?q='+encodeURIComponent(q)+'&z=16&hl=hi&output=embed';
+    return 'https://maps.google.com/maps?q='+encodeURIComponent(q)+'&z=17&hl=hi&output=embed';
   }
-  // ?q= or &q=
   m=u.match(/[?&]q=([^&]+)/);
   if(m){
-    return 'https://maps.google.com/maps?q='+m[1]+'&z=16&hl=hi&output=embed';
+    return 'https://maps.google.com/maps?q='+m[1]+'&z=17&hl=hi&output=embed';
   }
-  // !3dlat!4dlng style inside pb-like or data
   m=u.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
   if(m){
-    return 'https://maps.google.com/maps?q='+m[1]+','+m[2]+'&z=16&hl=hi&output=embed';
+    return 'https://maps.google.com/maps?q='+m[1]+','+m[2]+'&z=17&hl=hi&output=embed';
   }
-  // pb= only
   m=u.match(/[?&]pb=([^&\s]+)/);
   if(m){
     return 'https://www.google.com/maps/embed?pb='+m[1];
   }
-  // short links cannot be expanded in browser — fallback Jhansi temple area
   if(/goo\.gl\/|maps\.app\.goo\.gl/i.test(u)){
-    return 'https://maps.google.com/maps?q='+encodeURIComponent('तल्लैया मोहल्ला झाँसी')+'&z=16&hl=hi&output=embed';
+    return 'https://maps.google.com/maps?q='+encodeURIComponent('MAA BHADRAKALI UTSAV SAMITI, Khushipura, Jhansi, Uttar Pradesh 284002')+'&z=17&hl=hi&output=embed';
   }
-  // any google maps link left
   if(/google\.[^/]*\/maps/i.test(u)){
     try{
       const p=new URL(u);
       const q=p.searchParams.get('q');
-      if(q) return 'https://maps.google.com/maps?q='+encodeURIComponent(q)+'&z=16&hl=hi&output=embed';
+      if(q) return 'https://maps.google.com/maps?q='+encodeURIComponent(q)+'&z=17&hl=hi&output=embed';
     }catch(_){}
   }
-  // plain address / place name text
-  return 'https://maps.google.com/maps?q='+encodeURIComponent(u)+'&z=16&hl=hi&output=embed';
+  if(/भद्रकाली|bhadrakali|तल्लैया|talaiya|tallaiya|khushipura/i.test(u)){
+    return 'https://maps.google.com/maps?q='+encodeURIComponent('MAA BHADRAKALI UTSAV SAMITI, Khushipura, Jhansi, Uttar Pradesh 284002')+'&z=17&hl=hi&output=embed';
+  }
+  return 'https://maps.google.com/maps?q='+encodeURIComponent(u)+'&z=17&hl=hi&output=embed';
 }
 function toOpenMapUrl(url){
-  if(!url)return 'https://maps.google.com/maps?q='+encodeURIComponent('तल्लैया मोहल्ला झाँसी');
+  if(!url)return 'https://maps.app.goo.gl/9tnr6q14TzaDjryA9';
   const u=String(url).trim();
+  if(/9tnr6q14TzaDjryA9/i.test(u)) return 'https://maps.app.goo.gl/9tnr6q14TzaDjryA9';
   if(/goo\.gl|maps\.app\.goo\.gl|google\.[^/]*\/maps/i.test(u)) return u;
   let m=u.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
   if(m) return 'https://www.google.com/maps?q='+m[1]+','+m[2];
+  if(/भद्रकाली|bhadrakali|तल्लैया|khushipura/i.test(u)) return 'https://maps.app.goo.gl/9tnr6q14TzaDjryA9';
   return 'https://www.google.com/maps?q='+encodeURIComponent(u);
 }
 function renderPublicMap(){
