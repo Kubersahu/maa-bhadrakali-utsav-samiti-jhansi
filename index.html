@@ -877,7 +877,30 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 <div id="authPanel"><div class="auth-box"><div class="auth-head"><div><h2 id="authTitle">🔐 Login</h2><p style="margin-top:5px;color:#3c2a08">केवल अधिकृत Owner / Team Member</p></div><button class="auth-close" onclick="closeAuthPanel()">✕</button></div>
 <div class="auth-tabs"><button id="loginTab" class="auth-tab active" onclick="switchAuth('login')">Login</button><button id="signupTab" class="auth-tab" onclick="switchAuth('signup')">Signup</button></div>
 <div id="loginFields"><div class="field"><label>Email</label><input id="topEmail" type="email" placeholder="Owner/Team email"></div><div class="field"><label>Password</label><input id="topPassword" type="password" placeholder="Password"></div><button class="auth-action" onclick="topLogin()">Login</button><div class="auth-divider"><span>या</span></div><button type="button" class="google-auth-btn" onclick="googleAuth()">🇬 Continue with Google</button></div>
-<div id="signupFields" class="signup-fields"><div class="field"><label>Full Name</label><input id="signupName" placeholder="आपका नाम"></div><div class="field"><label>Date of Birth (DOB)</label><input id="signupDob" type="date"></div><div class="field"><label>Phone Number</label><input id="signupPhone" type="tel" inputmode="numeric" placeholder="मोबाइल नंबर"></div><div class="field"><label>Email</label><input id="signupEmail" type="email" placeholder="ईमेल"></div><div class="field"><label>Password</label><input id="signupPassword" type="password" placeholder="Password"></div><button class="auth-action" onclick="topSignup()">Create Account</button><div class="auth-divider"><span>या</span></div><button type="button" class="google-auth-btn" onclick="googleAuth()">🇬 Continue with Google</button></div>
+<div id="signupFields" class="signup-fields">
+<div class="field"><label>Full Name</label><input id="signupName" placeholder="पूरा असली नाम" maxlength="60"></div>
+<div class="field"><label>Date of Birth (DOB)</label><input id="signupDob" type="date"></div>
+<div class="field"><label>Phone Number</label>
+  <div style="display:flex;gap:8px;align-items:stretch">
+    <input id="signupPhone" type="tel" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" placeholder="10 अंक मोबाइल" style="flex:1">
+    <button type="button" id="btnSendOtp" class="auth-action" style="width:auto;margin:0;padding:12px 14px;white-space:nowrap" onclick="sendSignupOtp()">OTP भेजें</button>
+  </div>
+</div>
+<div class="field" id="otpFieldWrap" style="display:none">
+  <label>Mobile OTP (6 अंक)</label>
+  <div style="display:flex;gap:8px;align-items:stretch">
+    <input id="signupOtp" type="tel" inputmode="numeric" maxlength="6" placeholder="OTP लिखें" style="flex:1">
+    <button type="button" class="auth-action" style="width:auto;margin:0;padding:12px 14px;white-space:nowrap" onclick="verifySignupOtp()">Verify</button>
+  </div>
+  <small id="otpStatus" style="display:block;margin-top:6px;font-weight:700;color:#3c2a08"></small>
+</div>
+<div class="field"><label>Email</label><input id="signupEmail" type="email" placeholder="असली Gmail / Email"></div>
+<div class="field"><label>Password</label><input id="signupPassword" type="password" placeholder="Password"></div>
+<button class="auth-action" id="btnCreateAccount" onclick="topSignup()" disabled style="opacity:.45">Create Account (पहले OTP Verify करें)</button>
+<div class="auth-divider"><span>या</span></div>
+<button type="button" class="google-auth-btn" onclick="googleAuth()">🇬 Continue with Google</button>
+<p class="auth-note" style="margin-top:8px">⚠️ बिना Mobile OTP verify किए registration request नहीं जाएगी।</p>
+</div>
 <div id="authMsg" class="auth-note"></div><div class="auth-note">🔒 Email/Password और Google दोनों login/signup सीधे Supabase Auth से होंगे। Owner ही team access approve/manage करेगा।</div></div></div>
 
 
@@ -935,7 +958,12 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
       <div class="manager-card" id="cardSocial" data-access="social"><h3>📱 Social Media</h3><label>Facebook</label><input id="mFacebook" class="owner-input"><label>Instagram 1</label><input id="mInstagram" class="owner-input"><label>Instagram 2</label><input id="mInstagram2" class="owner-input"><label>WhatsApp</label><input id="mWhatsApp" class="owner-input"><label>Threads</label><input id="mThreads" class="owner-input"><label>X / Twitter</label><input id="mX" class="owner-input"><button onclick="saveLogoSocial('social')">💾 Save Social Media</button></div>
       <div class="manager-card" id="cardLogo" data-access="logo"><h3>🎨 Logo</h3><label>ऊपर Header Logo</label><input id="mHeaderLogo" class="owner-input" type="file" accept="image/*"><label>बीच वाला बड़ा Logo</label><input id="mMiddleLogo" class="owner-input" type="file" accept="image/*"><button onclick="saveLogoSocial('logo')">💾 Save Logos</button></div>
       <div class="manager-card" id="cardContact" data-access="contact"><h3>📞 Contact</h3><label>फोन</label><input id="mPhone" class="owner-input"><label>ईमेल</label><input id="mEmail" class="owner-input"><label>पूरा पता</label><textarea id="mAddress" class="owner-textarea"></textarea><button onclick="saveSettings()">💾 Save Contact</button></div>
-      <div class="manager-card" id="cardMap" data-access="map"><h3>📍 Google Map</h3><label>Google Maps URL</label><input id="mMap" class="owner-input" placeholder="Google Maps share/embed link"><button onclick="saveSettings()">💾 Save Google Map</button><p class="access-help">Google Maps app → Share → “Copy link” ya “Embed a map” ka link paste karein. Short link (goo.gl) se kabhi Africa dikh sakta hai — better: place link with @lat,lng ya full address: तल्लैया मोहल्ला झाँसी</p></div>
+      <div class="manager-card" id="cardMap" data-access="map"><h3>📍 Google Map</h3><label>Google Maps URL</label><input id="mMap" class="owner-input" placeholder="Google Maps share/embed link"><button onclick="saveSettings()">💾 Save Google Map</button>
+      <hr style="margin:14px 0;border:none;border-top:1px solid #b78a2444">
+      <label>📱 Fast2SMS API Key (Signup OTP SMS)</label>
+      <input id="mSmsApiKey" class="owner-input" placeholder="Fast2SMS authorization key">
+      <button type="button" onclick="saveSmsApiKey()">💾 Save SMS API Key</button>
+      <p class="access-help">Free key: fast2sms.com → Dev API. Key लगने पर OTP असली SMS से जाएगा। बिना key के OTP screen पर दिखेगा (testing)।</p><p class="access-help">Google Maps app → Share → “Copy link” ya “Embed a map” ka link paste karein. Short link (goo.gl) se kabhi Africa dikh sakta hai — better: place link with @lat,lng ya full address: तल्लैया मोहल्ला झाँसी</p></div>
       <div class="manager-card" id="cardFeedback" data-access="feedback"><h3>📨 Feedback / संदेश</h3><p>Website से भेजे गए messages यहाँ दिखेंगे।</p><div id="feedbackList"><div class="user-id-empty">⏳ Feedback load हो रही है…</div></div><button type="button" onclick="loadFeedbackMessages()">🔄 Refresh</button></div>
       <div class="manager-card" id="cardDonateToggle" data-access="prasad"><h3>💝 सहयोग Section ON/OFF</h3><p>Public website पर Donate / सहयोग section default बंद रहता है। जब QR / UPI तैयार हो तब चालू करें।</p><label style="display:flex;align-items:center;gap:10px;margin:12px 0"><input type="checkbox" id="mDonateVisible" style="transform:scale(1.3)"> Public page पर सहयोग section दिखाएँ</label><button onclick="saveDonateVisibility()">💾 Save Visibility</button></div>
       <div class="manager-card" id="cardRegistrationIds" data-access="registrationIds"><h3>🪪 Registration ID View</h3><p>यहाँ केवल Member ID और login details दिखती हैं (view only)।</p><div id="registeredUsersList"><div class="user-id-empty">⏳ Registered users load हो रहे हैं…</div></div></div>
@@ -1012,6 +1040,7 @@ function switchAuth(mode){
  document.getElementById('signupTab')?.classList.toggle('active',mode==='signup');
  const title=document.getElementById('authTitle');if(title)title.textContent=mode==='signup'?'📝 Signup':'🔐 Login';
  const msg=document.getElementById('authMsg');if(msg)msg.textContent='';
+ if(mode==='signup')resetSignupOtpUi();
 }
 
 async function topLogin(){
@@ -1035,21 +1064,208 @@ async function googleAuth(){
  if(error&&msg)msg.textContent='❌ '+error.message;
 }
 
+
+function isValidEmail(email){
+  email=String(email||'').trim().toLowerCase();
+  if(!/^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/i.test(email))return false;
+  // block common disposable / fake domains
+  const bad=['mailinator.com','tempmail.com','temp-mail.org','guerrillamail.com','10minutemail.com','yopmail.com','trashmail.com','fakeinbox.com','sharklasers.com','getnada.com','maildrop.cc','discard.email','throwaway.email'];
+  const domain=email.split('@')[1]||'';
+  if(bad.includes(domain))return false;
+  // block obvious junk like a@b.c style already caught; also test@test.com soft-warn still allowed format-wise
+  return true;
+}
+function normalizeIndianPhone(phone){
+  let p=String(phone||'').replace(/[\s\-()]/g,'');
+  if(p.startsWith('+91'))p=p.slice(3);
+  if(p.startsWith('91')&&p.length===12)p=p.slice(2);
+  if(p.startsWith('0')&&p.length===11)p=p.slice(1);
+  return p;
+}
+function isValidIndianPhone(phone){
+  const p=normalizeIndianPhone(phone);
+  return /^[6-9]\d{9}$/.test(p);
+}
+function isValidPersonName(name){
+  name=String(name||'').trim();
+  if(name.length<3)return false;
+  // letters, spaces, hindi, dot, apostrophe
+  return /^[\p{L}\p{M}\s.'’-]{3,60}$/u.test(name);
+}
+
+
+/* ===== PHONE OTP (signup gate) ===== */
+window._signupOtp={phone:'',code:'',expires:0,verified:false,sending:false};
+function _otpHash(code,phone){
+  const s=String(code)+'|'+String(phone)+'|mbus-otp-v1';
+  let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}
+  return String(h);
+}
+function setCreateAccountEnabled(on){
+  const btn=document.getElementById('btnCreateAccount');
+  if(!btn)return;
+  btn.disabled=!on;
+  btn.style.opacity=on?'1':'.45';
+  btn.textContent=on?'Create Account':'Create Account (पहले OTP Verify करें)';
+}
+function resetSignupOtpUi(){
+  window._signupOtp={phone:'',code:'',expires:0,verified:false,sending:false};
+  const w=document.getElementById('otpFieldWrap');if(w)w.style.display='none';
+  const o=document.getElementById('signupOtp');if(o)o.value='';
+  const st=document.getElementById('otpStatus');if(st)st.textContent='';
+  setCreateAccountEnabled(false);
+}
+async function deliverOtpSms(phone,otp){
+  // 1) Prefer Owner-configured Fast2SMS key in site settings
+  const key=(settings&&settings.smsApiKey)||finalGet('mbus_sms_api_key','')||'';
+  if(key){
+    try{
+      const url='https://www.fast2sms.com/dev/bulkV2?authorization='+encodeURIComponent(key)+'&route=otp&variables_values='+encodeURIComponent(otp)+'&flash=0&numbers='+encodeURIComponent(phone);
+      const res=await fetch(url,{method:'GET'});
+      const j=await res.json().catch(()=>({}));
+      if(j&&(j.return===true||j.return==='true'||String(j.message||'').toLowerCase().includes('success'))){
+        return {ok:true,via:'sms'};
+      }
+      console.warn('Fast2SMS response',j);
+    }catch(e){console.warn('Fast2SMS error',e)}
+  }
+  // 2) Try Supabase phone OTP (if Phone provider enabled)
+  try{
+    const {error}=await sb.auth.signInWithOtp({phone:'+91'+phone,options:{shouldCreateUser:false,channel:'sms'}});
+    if(!error)return {ok:true,via:'supabase'};
+    console.warn('supabase phone otp',error);
+  }catch(e){console.warn('supabase otp',e)}
+  // 3) Fallback: email the OTP to signup email (still blocks random bots; phone format required)
+  const email=(document.getElementById('signupEmail')?.value||'').trim().toLowerCase();
+  if(email&&isValidEmail(email)){
+    try{
+      // Store OTP in site_settings extras for owner audit + client verify
+      await saveRemoteExtras('lastOtpMeta',{phone,sentAt:new Date().toISOString(),via:'email-fallback'});
+    }catch(_){}
+    // Cannot send real email from static page without provider — store for verify only
+    // Return special so UI tells user OTP is shown once securely
+    return {ok:true,via:'local',otp:otp};
+  }
+  return {ok:false,error:'SMS service configured नहीं है'};
+}
+async function sendSignupOtp(){
+  const msg=document.getElementById('authMsg');
+  const phoneRaw=document.getElementById('signupPhone')?.value.trim()||'';
+  const email=(document.getElementById('signupEmail')?.value||'').trim().toLowerCase();
+  if(!isValidIndianPhone(phoneRaw)){if(msg)msg.textContent='❌ पहले सही 10 अंकों का मोबाइल डालें।';return}
+  if(!email||!isValidEmail(email)){if(msg)msg.textContent='❌ OTP से पहले सही Email भी डालें।';return}
+  if(window._signupOtp.sending)return;
+  const phone=normalizeIndianPhone(phoneRaw);
+  // rate limit 45s
+  if(window._signupOtp.phone===phone && Date.now()< (window._signupOtp.sentAt||0)+45000){
+    if(msg)msg.textContent='⏳ OTP पहले ही भेजा जा चुका है। 45 सेकंड बाद फिर try करें।';return;
+  }
+  window._signupOtp.sending=true;
+  const btn=document.getElementById('btnSendOtp');
+  if(btn){btn.disabled=true;btn.textContent='भेज रहा…'}
+  if(msg)msg.textContent='⏳ OTP भेजा जा रहा है…';
+  const otp=String(Math.floor(100000+Math.random()*900000));
+  const exp=Date.now()+5*60*1000;
+  window._signupOtp={phone,code:otp,expires:exp,verified:false,sending:true,sentAt:Date.now()};
+  try{sessionStorage.setItem('mbus_otp_v',JSON.stringify({p:phone,h:_otpHash(otp,phone),e:exp}))}catch(_){}
+  const delivered=await deliverOtpSms(phone,otp);
+  window._signupOtp.sending=false;
+  if(btn){btn.disabled=false;btn.textContent='OTP भेजें'}
+  const wrap=document.getElementById('otpFieldWrap');if(wrap)wrap.style.display='block';
+  const st=document.getElementById('otpStatus');
+  setCreateAccountEnabled(false);
+  if(!delivered.ok){
+    window._signupOtp.code='';
+    if(msg)msg.textContent='❌ OTP नहीं भेज सके। Owner को SMS API (Fast2SMS) configure करना होगा।';
+    if(st)st.textContent='OTP send failed';
+    return;
+  }
+  if(delivered.via==='local'){
+    // Last-resort delivery without SMS gateway: show OTP once in auth message for this device only
+    // (Static site has no SMS without API key. Owner should add Fast2SMS key for real SMS.)
+    if(msg)msg.textContent='✓ OTP: '+otp+' (5 मिनट valid)। Verify करें। Real SMS के लिए Owner Fast2SMS API key लगाए।';
+    if(st)st.textContent='OTP generate हो गया — Verify दबाएँ';
+  }else if(delivered.via==='sms'){
+    if(msg)msg.textContent='✓ OTP आपके मोबाइल '+phone+' पर भेज दिया गया।';
+    if(st)st.textContent='SMS भेज दिया गया';
+  }else{
+    if(msg)msg.textContent='✓ OTP आपके मोबाइल पर भेजने की कोशिश की गई।';
+    if(st)st.textContent='OTP भेजा गया';
+  }
+  toast('✓ OTP process शुरू');
+}
+function verifySignupOtp(){
+  const msg=document.getElementById('authMsg');
+  const entered=(document.getElementById('signupOtp')?.value||'').trim();
+  const phone=normalizeIndianPhone(document.getElementById('signupPhone')?.value||'');
+  const st=document.getElementById('otpStatus');
+  if(!/^\d{6}$/.test(entered)){if(msg)msg.textContent='❌ 6 अंकों का OTP लिखें।';return}
+  if(!window._signupOtp.code||window._signupOtp.phone!==phone){
+    // restore from session
+    try{
+      const raw=JSON.parse(sessionStorage.getItem('mbus_otp_v')||'null');
+      if(raw&&raw.p===phone&&Date.now()<raw.e&&_otpHash(entered,phone)===raw.h){
+        window._signupOtp={phone,code:entered,expires:raw.e,verified:true,sending:false};
+        setCreateAccountEnabled(true);
+        if(st)st.textContent='✓ Mobile OTP verified';
+        if(msg)msg.textContent='✓ Mobile verify हो गया। अब Create Account दबाएँ।';
+        toast('✓ OTP verified');
+        return;
+      }
+    }catch(_){}
+    if(msg)msg.textContent='❌ पहले OTP भेजें।';return;
+  }
+  if(Date.now()>window._signupOtp.expires){if(msg)msg.textContent='❌ OTP expire हो गया। नया OTP भेजें।';setCreateAccountEnabled(false);return}
+  if(entered!==window._signupOtp.code){if(msg)msg.textContent='❌ गलत OTP।';setCreateAccountEnabled(false);return}
+  window._signupOtp.verified=true;
+  setCreateAccountEnabled(true);
+  if(st)st.textContent='✓ Mobile OTP verified';
+  if(msg)msg.textContent='✓ Mobile verify हो गया। अब Create Account दबाएँ।';
+  toast('✓ OTP verified');
+}
+
+
 async function topSignup(){
  const name=document.getElementById('signupName')?.value.trim(),dob=document.getElementById('signupDob')?.value,
- phone=document.getElementById('signupPhone')?.value.trim(),email=document.getElementById('signupEmail')?.value.trim(),
+ phoneRaw=document.getElementById('signupPhone')?.value.trim(),email=document.getElementById('signupEmail')?.value.trim().toLowerCase(),
  pass=document.getElementById('signupPassword')?.value||'',msg=document.getElementById('authMsg');
- if(!name||!dob||!phone||!email||!pass){if(msg)msg.textContent='❌ Name, DOB, phone, email और password सभी भरें।';return}
+ if(!name||!dob||!phoneRaw||!email||!pass){if(msg)msg.textContent='❌ Name, DOB, phone, email और password सभी भरें।';return}
+ if(!isValidPersonName(name)){if(msg)msg.textContent='❌ सही नाम लिखें (कम से कम 3 अक्षर, सिर्फ नाम)।';return}
+ if(!isValidEmail(email)){if(msg)msg.textContent='❌ सही / असली Email डालें। Fake या temporary email allowed नहीं।';return}
+ if(!isValidIndianPhone(phoneRaw)){if(msg)msg.textContent='❌ सही 10 अंकों का भारतीय मोबाइल डालें (6–9 से शुरू)।';return}
+ const phone=normalizeIndianPhone(phoneRaw);
+ // OTP gate — without verified mobile, no request
+ if(!window._signupOtp||!window._signupOtp.verified||window._signupOtp.phone!==phone){
+   if(msg)msg.textContent='❌ पहले Mobile पर OTP भेजकर Verify करें। बिना OTP request नहीं जाएगी।';
+   toast('❌ पहले OTP verify करें');
+   return;
+ }
+ if(Date.now()>window._signupOtp.expires){if(msg)msg.textContent='❌ OTP expire। नया OTP भेजें।';window._signupOtp.verified=false;setCreateAccountEnabled(false);return}
+
  if(pass.length<6){if(msg)msg.textContent='❌ Password कम से कम 6 characters का रखें।';return}
+ // DOB not in future, age reasonable
+ try{
+   const d=new Date(dob),now=new Date();
+   if(isNaN(d.getTime())||d>now){if(msg)msg.textContent='❌ सही Date of Birth डालें।';return}
+   const age=(now-d)/(365.25*24*3600*1000);
+   if(age<10||age>100){if(msg)msg.textContent='❌ DOB सही नहीं लग रही।';return}
+ }catch(_){if(msg)msg.textContent='❌ सही Date of Birth डालें।';return}
+ if(msg)msg.textContent='⏳ Account बन रहा है…';
  const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name,date_of_birth:dob,phone:phone}}});
  if(error){if(msg)msg.textContent='❌ '+error.message;return}
- // Profile row must exist so Owner sees New Registration Request
  try{
   const user=data?.user||data?.session?.user;
-  if(user){await ensureUserProfile(user);}
-  else if(data?.session){await ensureUserProfile(data.session.user);}
+  if(user){
+    // force metadata on profile insert
+    user.user_metadata={...(user.user_metadata||{}),full_name:name,date_of_birth:dob,phone:phone};
+    await ensureUserProfile(user);
+  }else if(data?.session?.user){
+    data.session.user.user_metadata={...(data.session.user.user_metadata||{}),full_name:name,date_of_birth:dob,phone:phone};
+    await ensureUserProfile(data.session.user);
+  }
  }catch(e){console.warn('signup profile',e)}
- if(msg)msg.textContent=data.session?'✓ Account created. Owner approval के बाद management access मिलेगा।':'✓ Signup हो गया। Email confirm / Login के बाद Owner को request दिखेगी।';
+ if(msg)msg.textContent=data.session?'✓ Request भेज दी गई। Owner approval के बाद access मिलेगा।':'✓ Signup हो गया। Email confirm के बाद Owner को request दिखेगी।';
+ resetSignupOtpUi();
 }
 
 async function openManagement(user){
@@ -1064,6 +1280,7 @@ function closeManagement(){clearManagementFilePicker();try{localStorage.removeIt
 function fillForm(){
  const map={mYears:'years',mNavratri:'navratri',mArrival:'arrival',mMaha:'maha',mShringar:'shringar',mMorning:'morning',mEveningAarti:'eveningAarti',mMahaAarti:'mahaAarti',mPrasad:'prasad',mPandit:'pandit',mPresident:'president',mTreasurer:'treasurer',mUpi:'upi',mDonation:'donation',mPhone:'phone',mEmail:'email',mAddress:'address',mMap:'map'};
  for(const id in map){const e=document.getElementById(id);if(e)e.value=settings[map[id]]??''}
+ const sk=document.getElementById('mSmsApiKey');if(sk)sk.value=settings.smsApiKey||finalGet('mbus_sms_api_key','')||'';
  
 }
 
@@ -1469,31 +1686,58 @@ async function ensureUserProfile(user){
   if(!user?.id)return null;
   const meta=user.user_metadata||{};
   const email=(user.email||'').trim().toLowerCase();
+  const phone=normalizeIndianPhone(meta.phone||'');
   const incoming={
    id:user.id,
    email,
-   full_name:meta.full_name||meta.name||'',
-   dob:meta.date_of_birth||'',
-   phone:meta.phone||'',
+   full_name:(meta.full_name||meta.name||'').trim(),
+   dob:meta.date_of_birth||meta.dob||'',
+   phone:isValidIndianPhone(phone)?phone:(meta.phone||''),
    avatar_url:meta.avatar_url||meta.picture||'',
   };
-  let {data:existing,error:getErr}=await sb.from('user_profiles').select('*').eq('id',user.id).maybeSingle();
-  if(getErr)throw getErr;
+  // try by id first, then by email (Google re-login edge cases)
+  let existing=null,getErr=null;
+  ({data:existing,error:getErr}=await sb.from('user_profiles').select('*').eq('id',user.id).maybeSingle());
+  if(getErr)console.warn('profile by id',getErr);
+  if(!existing && email){
+    const r2=await sb.from('user_profiles').select('*').eq('email',email).maybeSingle();
+    if(r2.data)existing=r2.data;
+  }
   if(!existing){
-   const profile={...incoming,status:'pending',permissions:defaultMemberPermissions(),team_id:makeTeamId(user.id+email)};
+   const profile={
+     ...incoming,
+     status:'pending',
+     permissions:defaultMemberPermissions(),
+     team_id:makeTeamId(user.id+email),
+     created_at:new Date().toISOString()
+   };
    const {data:created,error}=await sb.from('user_profiles').insert(profile).select('*').maybeSingle();
-   if(error)throw error;
+   if(error){
+     // unique conflict — fetch again
+     console.warn('profile insert',error);
+     const r3=await sb.from('user_profiles').select('*').eq('id',user.id).maybeSingle();
+     if(r3.data)return r3.data;
+     const r4=await sb.from('user_profiles').select('*').eq('email',email).maybeSingle();
+     return r4.data||null;
+   }
    return created||profile;
   }
   const patch={};
-  if(!existing.full_name&&incoming.full_name)patch.full_name=incoming.full_name;
-  if(!existing.phone&&incoming.phone)patch.phone=incoming.phone;
-  if(!existing.dob&&incoming.dob)patch.dob=incoming.dob;
-  if(!existing.avatar_url&&incoming.avatar_url)patch.avatar_url=incoming.avatar_url;
-  if(!existing.email&&email)patch.email=email;
+  if(incoming.full_name && (!existing.full_name || existing.full_name!==incoming.full_name)){
+    // only fill empty name from Google; don't overwrite edited name if both exist and differ intentionally
+    if(!existing.full_name)patch.full_name=incoming.full_name;
+  }
+  if(!existing.phone && incoming.phone)patch.phone=incoming.phone;
+  if(!existing.dob && incoming.dob)patch.dob=incoming.dob;
+  if(!existing.avatar_url && incoming.avatar_url)patch.avatar_url=incoming.avatar_url;
+  if(!existing.email && email)patch.email=email;
   if(!existing.team_id)patch.team_id=makeTeamId(user.id+email);
+  // ensure id matches auth user for Google
+  if(existing.id!==user.id){
+    // rare: email matched old row — still return existing
+  }
   if(Object.keys(patch).length){
-   const {data:updated,error}=await sb.from('user_profiles').update(patch).eq('id',user.id).select('*').maybeSingle();
+   const {data:updated,error}=await sb.from('user_profiles').update(patch).eq('id',existing.id).select('*').maybeSingle();
    if(!error&&updated)existing=updated;
   }
   return existing;
@@ -2008,6 +2252,14 @@ function loadFinalForms(){const defs={editHeroBadge:'🔱 जय माँ भ�
 
 
 /* ===== GOOGLE MAP PUBLIC RENDER ===== */
+async function saveSmsApiKey(){
+  if(!requireAuthenticated())return;
+  const key=(document.getElementById('mSmsApiKey')?.value||'').trim();
+  settings.smsApiKey=key;
+  finalStore('mbus_sms_api_key',key);
+  try{await saveRemoteExtras('smsApiKey',key)}catch(_){}
+  toast(key?'✓ SMS API key save हो गई। अब OTP SMS पर जाएगा।':'✓ SMS key clear हो गई।');
+}
 function toEmbedMapUrl(url){
   if(!url)return '';
   let u=String(url).trim();
@@ -2402,10 +2654,11 @@ setTimeout(bindManagementFilePickerGuard,500);
 
 sb.auth.onAuthStateChange(async (event,session)=>{
  if(event==='SIGNED_IN' && session?.user){
+   // Always sync profile so Owner sees Google/email signup in New Requests
+   try{await ensureUserProfile(session.user)}catch(e){console.warn('auth profile sync',e)}
    let want=false;
    try{want=sessionStorage.getItem('mbus_want_management')==='1'}catch(_){}
    if(want){explicitManagementLogin=true;try{sessionStorage.removeItem('mbus_want_management')}catch(_){}}
-   // Only open panel when user intentionally logged in for management
    if(!explicitManagementLogin){return}
    explicitManagementLogin=false;
    if(filePickerGuardActive()){restoreManagementPanelAfterFilePicker();return}
