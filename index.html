@@ -1016,6 +1016,7 @@ function switchAuth(mode){
 
 async function topLogin(){
  explicitManagementLogin=true;
+ try{sessionStorage.setItem('mbus_want_management','1')}catch(_){}
  const email=document.getElementById('topEmail')?.value.trim(),pass=document.getElementById('topPassword')?.value||'';
  const msg=document.getElementById('authMsg');
  if(!email||!pass){if(msg)msg.textContent='❌ Email और password भरें।';return}
@@ -1026,10 +1027,11 @@ async function topLogin(){
 }
 async function googleAuth(){
  explicitManagementLogin=true;
+ try{sessionStorage.setItem('mbus_want_management','1')}catch(_){}
  const msg=document.getElementById('authMsg');
  if(msg)msg.textContent='⏳ Google → Supabase Auth खुल रहा है…';
- const redirectTo='https://kubersahu.github.io/maa-bhadrakali-utsav-samiti-jhansi/';
- const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo}});
+ const redirectTo=window.location.origin+window.location.pathname;
+ const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo,queryParams:{prompt:'select_account'}}});
  if(error&&msg)msg.textContent='❌ '+error.message;
 }
 
@@ -1724,12 +1726,28 @@ async function applyManagementAccess(user){
    if(active&&ACCESS_KEYS.includes(active))setTimeout(()=>openManagementMenu(active),0);
    syncLocalMediaToCloud();return true;
  }
- const approved=profile?.status==='approved',isTeam=approved&&!!member;
- if(!isTeam){toast(approved?'✓ Login successful. Team access अभी assigned नहीं है।':'✓ Signup/Login successful. Owner approval के बाद Team access मिलेगा।');return false}
- const perms=normalizePerms(profile?.permissions||member.permissions);panel.classList.add('open');document.body.style.overflow='hidden';titleEl.textContent='⚙️ Team Management Panel';roleEl.textContent=`Team Member • ${profile?.full_name||member.name||email} • Assigned Access`;
- renderCurrentUserIdCard(user,profile,member,false);const allowedKeys=ACCESS_KEYS.filter(k=>perms[k]);renderManagementMenu(allowedKeys);loadFinalForms();
+ const approved=profile?.status==='approved';
+ if(!approved){
+   toast('✓ Login successful. Owner approval के बाद management panel खुलेगा।');
+   return false;
+ }
+ // Approved = panel open (teamMembers list optional). Permissions from profile.
+ const perms=normalizePerms(profile?.permissions||(member&&member.permissions));
+ const allowedKeys=ACCESS_KEYS.filter(k=>perms[k]);
+ panel.classList.add('open');document.body.style.overflow='hidden';
+ titleEl.textContent='⚙️ Team Management Panel';
+ roleEl.textContent=`Team Member • ${profile?.full_name||member?.name||email} • ${allowedKeys.length?('Access: '+allowedKeys.length):'Access pending'}`;
+ renderCurrentUserIdCard(user,profile,member,false);
+ renderManagementMenu(allowedKeys.length?allowedKeys:ACCESS_KEYS.filter(()=>false));
+ loadFinalForms();
+ if(!allowedKeys.length){
+   toast('✓ Login OK. Owner ने approve किया है, पर अभी कोई panel access assign नहीं है। Owner → Team Access से permission दें।');
+ }else{
+   toast('✓ Team login successful');
+ }
  let active='';try{active=localStorage.getItem('mbus_management_active_card')||''}catch(e){}
- if(active&&allowedKeys.includes(active))setTimeout(()=>openManagementMenu(active),0);return true;
+ if(active&&allowedKeys.includes(active))setTimeout(()=>openManagementMenu(active),0);
+ return true;
 }
 function renderCurrentUserIdCard(user,profile,member,isOwner){
  const box=document.getElementById('currentUserIdCard');if(!box)return;
@@ -2370,19 +2388,20 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 setTimeout(bindManagementFilePickerGuard,500);
 
 sb.auth.onAuthStateChange(async (event,session)=>{
- if(event==='SIGNED_IN'&&session?.user){
-   currentAuthUser=session.user;
-   // Always create/sync profile so Owner sees registration request
-   try{await ensureUserProfile(session.user)}catch(e){console.warn('auth profile sync',e)}
-   // Never auto-open Management for a normal page load or an existing session.
-   // Only an explicit login action may open it.
+ if(event==='SIGNED_IN' && session?.user){
+   let want=false;
+   try{want=sessionStorage.getItem('mbus_want_management')==='1'}catch(_){}
+   if(want){explicitManagementLogin=true;try{sessionStorage.removeItem('mbus_want_management')}catch(_){}}
+   // Only open panel when user intentionally logged in for management
    if(!explicitManagementLogin){return}
    explicitManagementLogin=false;
    if(filePickerGuardActive()){restoreManagementPanelAfterFilePicker();return}
-   closeAuthPanel();openManagement(session.user);
+   closeAuthPanel();
+   await openManagement(session.user);
  }
  if(event==='SIGNED_OUT'){
    explicitManagementLogin=false;
+   try{sessionStorage.removeItem('mbus_want_management')}catch(_){}
    currentAuthUser=null;
    closeManagement();
  }
