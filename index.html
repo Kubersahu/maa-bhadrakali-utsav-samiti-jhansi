@@ -935,7 +935,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
       <div class="manager-card" id="cardSocial" data-access="social"><h3>📱 Social Media</h3><label>Facebook</label><input id="mFacebook" class="owner-input"><label>Instagram 1</label><input id="mInstagram" class="owner-input"><label>Instagram 2</label><input id="mInstagram2" class="owner-input"><label>WhatsApp</label><input id="mWhatsApp" class="owner-input"><label>Threads</label><input id="mThreads" class="owner-input"><label>X / Twitter</label><input id="mX" class="owner-input"><button onclick="saveLogoSocial('social')">💾 Save Social Media</button></div>
       <div class="manager-card" id="cardLogo" data-access="logo"><h3>🎨 Logo</h3><label>ऊपर Header Logo</label><input id="mHeaderLogo" class="owner-input" type="file" accept="image/*"><label>बीच वाला बड़ा Logo</label><input id="mMiddleLogo" class="owner-input" type="file" accept="image/*"><button onclick="saveLogoSocial('logo')">💾 Save Logos</button></div>
       <div class="manager-card" id="cardContact" data-access="contact"><h3>📞 Contact</h3><label>फोन</label><input id="mPhone" class="owner-input"><label>ईमेल</label><input id="mEmail" class="owner-input"><label>पूरा पता</label><textarea id="mAddress" class="owner-textarea"></textarea><button onclick="saveSettings()">💾 Save Contact</button></div>
-      <div class="manager-card" id="cardMap" data-access="map"><h3>📍 Google Map</h3><label>Google Maps URL</label><input id="mMap" class="owner-input" placeholder="Google Maps share/embed link"><button onclick="saveSettings()">💾 Save Google Map</button><p class="access-help">Public page पर iframe map + “Open in Google Maps” button दिखेगा।</p></div>
+      <div class="manager-card" id="cardMap" data-access="map"><h3>📍 Google Map</h3><label>Google Maps URL</label><input id="mMap" class="owner-input" placeholder="Google Maps share/embed link"><button onclick="saveSettings()">💾 Save Google Map</button><p class="access-help">Google Maps app → Share → “Copy link” ya “Embed a map” ka link paste karein. Short link (goo.gl) se kabhi Africa dikh sakta hai — better: place link with @lat,lng ya full address: तल्लैया मोहल्ला झाँसी</p></div>
       <div class="manager-card" id="cardFeedback" data-access="feedback"><h3>📨 Feedback / संदेश</h3><p>Website से भेजे गए messages यहाँ दिखेंगे।</p><div id="feedbackList"><div class="user-id-empty">⏳ Feedback load हो रही है…</div></div><button type="button" onclick="loadFeedbackMessages()">🔄 Refresh</button></div>
       <div class="manager-card" id="cardDonateToggle" data-access="prasad"><h3>💝 सहयोग Section ON/OFF</h3><p>Public website पर Donate / सहयोग section default बंद रहता है। जब QR / UPI तैयार हो तब चालू करें।</p><label style="display:flex;align-items:center;gap:10px;margin:12px 0"><input type="checkbox" id="mDonateVisible" style="transform:scale(1.3)"> Public page पर सहयोग section दिखाएँ</label><button onclick="saveDonateVisibility()">💾 Save Visibility</button></div>
       <div class="manager-card" id="cardRegistrationIds" data-access="registrationIds"><h3>🪪 Registration ID View</h3><p>यहाँ केवल Member ID और login details दिखती हैं (view only)।</p><div id="registeredUsersList"><div class="user-id-empty">⏳ Registered users load हो रहे हैं…</div></div></div>
@@ -1979,30 +1979,73 @@ function loadFinalForms(){const defs={editHeroBadge:'🔱 जय माँ भ�
 /* ===== GOOGLE MAP PUBLIC RENDER ===== */
 function toEmbedMapUrl(url){
   if(!url)return '';
-  const u=String(url).trim();
+  let u=String(url).trim();
   if(!u)return '';
-  // already embed
-  if(/google\.[^/]+\/maps\/embed/i.test(u))return u;
-  // extract coords @lat,lng
-  let m=u.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if(m)return 'https://www.google.com/maps?q='+m[1]+','+m[2]+'&z=16&output=embed';
-  // place or search query
-  m=u.match(/[?&]q=([^&]+)/);
-  if(m)return 'https://www.google.com/maps?q='+m[1]+'&z=16&output=embed';
-  // pb= embed param
-  m=u.match(/[?&]pb=([^&]+)/);
-  if(m)return 'https://www.google.com/maps/embed?pb='+m[1];
-  // generic maps link -> embed via q=
-  if(/google\.[^/]+\/maps/i.test(u)){
+  // already proper embed URL
+  if(/google\.[^/]+\/maps\/embed(\?|\/)/i.test(u)){
+    // keep pb= embed, strip broken api key if any
     try{
-      const parsed=new URL(u);
-      const q=parsed.searchParams.get('q')||parsed.pathname;
-      return 'https://www.google.com/maps?q='+encodeURIComponent(q.replace(/^\/maps\//,''))+'&z=16&output=embed';
-    }catch(e){}
-    return 'https://www.google.com/maps?q='+encodeURIComponent(u)+'&output=embed';
+      const p=new URL(u);
+      if(p.searchParams.get('pb')) return 'https://www.google.com/maps/embed?pb='+p.searchParams.get('pb');
+    }catch(_){}
+    return u;
   }
-  // plain address or coords
-  return 'https://www.google.com/maps?q='+encodeURIComponent(u)+'&z=16&output=embed';
+  // coords from @lat,lng,zoom
+  let m=u.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m){
+    return 'https://maps.google.com/maps?q='+m[1]+','+m[2]+'&z=16&hl=hi&output=embed';
+  }
+  // /maps/place/Place+Name/
+  m=u.match(/\/maps\/place\/([^/@?\s]+)/i);
+  if(m){
+    let place='';
+    try{place=decodeURIComponent(m[1].replace(/\+/g,' '));}catch(_){place=m[1].replace(/\+/g,' ');}
+    return 'https://maps.google.com/maps?q='+encodeURIComponent(place)+'&z=16&hl=hi&output=embed';
+  }
+  // /maps/search/query
+  m=u.match(/\/maps\/search\/([^/?\s]+)/i);
+  if(m){
+    let q='';
+    try{q=decodeURIComponent(m[1].replace(/\+/g,' '));}catch(_){q=m[1];}
+    return 'https://maps.google.com/maps?q='+encodeURIComponent(q)+'&z=16&hl=hi&output=embed';
+  }
+  // ?q= or &q=
+  m=u.match(/[?&]q=([^&]+)/);
+  if(m){
+    return 'https://maps.google.com/maps?q='+m[1]+'&z=16&hl=hi&output=embed';
+  }
+  // !3dlat!4dlng style inside pb-like or data
+  m=u.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+  if(m){
+    return 'https://maps.google.com/maps?q='+m[1]+','+m[2]+'&z=16&hl=hi&output=embed';
+  }
+  // pb= only
+  m=u.match(/[?&]pb=([^&\s]+)/);
+  if(m){
+    return 'https://www.google.com/maps/embed?pb='+m[1];
+  }
+  // short links cannot be expanded in browser — fallback Jhansi temple area
+  if(/goo\.gl\/|maps\.app\.goo\.gl/i.test(u)){
+    return 'https://maps.google.com/maps?q='+encodeURIComponent('तल्लैया मोहल्ला झाँसी')+'&z=16&hl=hi&output=embed';
+  }
+  // any google maps link left
+  if(/google\.[^/]*\/maps/i.test(u)){
+    try{
+      const p=new URL(u);
+      const q=p.searchParams.get('q');
+      if(q) return 'https://maps.google.com/maps?q='+encodeURIComponent(q)+'&z=16&hl=hi&output=embed';
+    }catch(_){}
+  }
+  // plain address / place name text
+  return 'https://maps.google.com/maps?q='+encodeURIComponent(u)+'&z=16&hl=hi&output=embed';
+}
+function toOpenMapUrl(url){
+  if(!url)return 'https://maps.google.com/maps?q='+encodeURIComponent('तल्लैया मोहल्ला झाँसी');
+  const u=String(url).trim();
+  if(/goo\.gl|maps\.app\.goo\.gl|google\.[^/]*\/maps/i.test(u)) return u;
+  let m=u.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m) return 'https://www.google.com/maps?q='+m[1]+','+m[2];
+  return 'https://www.google.com/maps?q='+encodeURIComponent(u);
 }
 function renderPublicMap(){
   const url=(settings.map||'').trim();
@@ -2022,9 +2065,13 @@ function renderPublicMap(){
   const embed=toEmbedMapUrl(url);
   if(placeholder)placeholder.style.display='none';
   if(embedWrap)embedWrap.style.display='block';
-  if(iframe&&embed)iframe.src=embed;
+  if(iframe&&embed){
+    iframe.src=embed;
+    iframe.setAttribute('loading','lazy');
+    iframe.setAttribute('referrerpolicy','no-referrer-when-downgrade');
+  }
   if(openWrap)openWrap.style.display='block';
-  if(openBtn){openBtn.href=url;openBtn.style.display='inline-block'}
+  if(openBtn){openBtn.href=toOpenMapUrl(url);openBtn.style.display='inline-block'}
 }
 
 /* ===== DONATE VISIBILITY ===== */
