@@ -1749,17 +1749,25 @@ async function applyManagementAccess(user){
  if(active&&allowedKeys.includes(active))setTimeout(()=>openManagementMenu(active),0);
  return true;
 }
+function idCardStorageKey(user){
+  const id=(user?.id||'').trim();
+  const em=(user?.email||'').trim().toLowerCase();
+  return 'mbus_id_card_'+ (id||em||'guest');
+}
 function renderCurrentUserIdCard(user,profile,member,isOwner){
  const box=document.getElementById('currentUserIdCard');if(!box)return;
- const saved=finalGet('mbus_id_card_details',{});
+ // Per-user only — never show another member/owner's shared card
+ const saved=finalGet(idCardStorageKey(user),{})||{};
  const meta=user?.user_metadata||{};
  const email=(user?.email||profile?.email||member?.email||'').trim().toLowerCase();
+ // Priority: this user's profile (DB) > this user's local edits > auth metadata > member row
+ // NEVER use global mbus_id_card_details (that was showing Owner details to everyone)
  const values={
-  name:saved.name||profile?.full_name||member?.name||meta.full_name||meta.name||(isOwner?'Owner':'Team Member'),
-  email:saved.email||profile?.email||member?.email||user?.email||'',
-  phone:saved.phone||profile?.phone||member?.phone||meta.phone||'',
-  address:saved.address||profile?.address||'',
-  teamId:profile?.team_id||member?.teamId||makeTeamId((user?.id||'')+email)
+  name:(profile?.full_name||saved.name||member?.name||meta.full_name||meta.name||(isOwner?'Owner':'Team Member')||'').trim(),
+  email:(profile?.email||user?.email||saved.email||member?.email||email||'').trim(),
+  phone:(profile?.phone||saved.phone||member?.phone||meta.phone||'').trim(),
+  address:(profile?.address||saved.address||'').trim(),
+  teamId:(profile?.team_id||member?.teamId||saved.teamId||makeTeamId((user?.id||'')+email)||'').trim()
  };
  const e=escapeHtml;
  box.innerHTML=`
@@ -1799,33 +1807,38 @@ function toggleIdCardEditor(force){
 function setLiveIdValue(id,value){const el=document.getElementById(id);if(el)el.textContent=value||''}
 async function saveIdCardDetails(){
  const get=id=>(document.getElementById(id)?.value||'').trim();
- const old=finalGet('mbus_id_card_details',{});
+ if(!currentAuthUser?.id){toast('❌ Login session missing');return}
  const teamId=get('idEditTeamId')||makeTeamId((currentAuthUser?.id||'')+(currentAuthUser?.email||''));
  const d={
   name:get('idEditName'),
   email:get('idEditEmail'),
   phone:get('idEditPhone'),
   address:get('idEditAddress'),
-  teamId
+  teamId,
+  userId:currentAuthUser.id
  };
  try{
-  finalStore('mbus_id_card_details',d);
+  // Save only for THIS logged-in user (local + profile table)
+  finalStore(idCardStorageKey(currentAuthUser),d);
   const {error:profileErr}=await sb.from('user_profiles').update({
-    full_name:d.name,email:d.email,phone:d.phone,team_id:d.teamId
-  }).eq('id',currentAuthUser?.id);
+    full_name:d.name,
+    phone:d.phone,
+    team_id:d.teamId
+    // address column may not exist — ignore if fails
+  }).eq('id',currentAuthUser.id);
   if(profileErr)console.warn('Profile update:',profileErr);
-  const ok=await saveRemoteExtras('idCardDetails',d);
-  if(!ok)throw new Error('online save failed');
+  // Also try address if column exists
+  try{await sb.from('user_profiles').update({address:d.address}).eq('id',currentAuthUser.id)}catch(_){}
   setLiveIdValue('liveIdName',d.name);
   setLiveIdValue('liveIdEmail',d.email);
   setLiveIdValue('liveIdPhone',d.phone);
   setLiveIdValue('liveIdAddress',d.address);
   setLiveIdValue('liveIdTeamId',d.teamId);
-  toast('✓ ID Card details online save हो गईं।');
+  toast('✓ ID Card details save हो गईं (आपकी अपनी)।');
   toggleIdCardEditor(false);
  }catch(err){
   console.error(err);
-  toast('❌ ID Card details save नहीं हुईं। Supabase check करें।');
+  toast('❌ ID Card details save नहीं हुईं।');
  }
 }
 function renderManagementMenu(keys){
