@@ -15,8 +15,11 @@ window.MBUS_ADMIN_APP=true;
 .admin-app-mode .top-login-btn,
 .admin-app-mode #topLoginBtn{display:none!important}
 .admin-app-mode body{background:#120a00;min-height:100vh}
-.admin-app-mode #authPanel{display:flex!important;align-items:center;justify-content:center}
-.admin-app-mode #authPanel:not(.open){/* still allow open class */}
+/* Auth only when .open — never block management panel */
+.admin-app-mode #authPanel{display:none;align-items:center;justify-content:center;z-index:1200}
+.admin-app-mode #authPanel.open{display:flex!important}
+.admin-app-mode #managementPanel{z-index:1300!important}
+.admin-app-mode #managementPanel.open{display:block!important}
 </style>
 
 <meta charset="UTF-8">
@@ -1044,6 +1047,12 @@ function switchAuth(mode){
  const msg=document.getElementById('authMsg');if(msg)msg.textContent='';
 }
 
+async function withTimeout(promise, ms, label){
+  let t;
+  const timeout=new Promise((_,rej)=>{t=setTimeout(()=>rej(new Error((label||'Request')+' timeout ('+ms+'ms). Internet/Supabase check karein.')),ms)});
+  try{return await Promise.race([promise,timeout])}
+  finally{clearTimeout(t)}
+}
 async function topLogin(){
  explicitManagementLogin=true;
  try{sessionStorage.setItem('mbus_want_management','1')}catch(_){}
@@ -1052,23 +1061,62 @@ async function topLogin(){
  if(!email||!pass){if(msg)msg.textContent='❌ Email और password भरें।';return}
  if(msg)msg.textContent='⏳ Login हो रहा है…';
  try{
-  const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
-  if(error){
-    let m=error.message||'Login failed';
-    if(/invalid login|invalid credentials/i.test(m))m='Email या Password गलत है।';
-    if(/email not confirmed/i.test(m))m='Email confirm नहीं हुई। Inbox/Spam में confirm link देखें।';
-    if(msg)msg.textContent='❌ '+m;
-    toast('❌ '+m);
+  if(typeof sb==='undefined'||!sb?.auth){
+    if(msg)msg.textContent='❌ Supabase load नहीं हुआ। Page refresh karein.';
     return;
   }
+  const {data,error}=await withTimeout(
+    sb.auth.signInWithPassword({email,password:pass}),
+    20000,
+    'Login'
+  );
+  if(error){
+    const raw=(error.message||'')+' '+(error.code||'');
+    let m=error.message||'Login failed';
+    if(/invalid login|invalid credentials|invalid_credentials/i.test(raw))
+      m='Email/Password match नहीं। Google se login try karein, ya Password Reset use karein.';
+    else if(/email not confirmed|not_confirmed/i.test(raw))
+      m='Email confirm pending. Supabase → Authentication → Users se confirm karein.';
+    else if(/failed to fetch|network|cors/i.test(raw))
+      m='Network error — internet on karein, thodi der baad try karein.';
+    if(msg)msg.textContent='❌ '+m;
+    toast('❌ Login failed');
+    console.warn('login error',error);
+    return;
+  }
+  if(!data?.user){
+    if(msg)msg.textContent='❌ Login response empty. Dobara try karein.';
+    return;
+  }
+  if(msg)msg.textContent='✓ Login OK — Panel खोल रहे हैं…';
   try{sessionStorage.removeItem('mbus_want_management')}catch(_){}
-  closeAuthPanel();
-  await openManagement(data.user);
-  toast('✓ Login successful');
+  try{closeAuthPanel()}catch(_){}
+  try{
+    await withTimeout(openManagement(data.user), 25000, 'Open panel');
+    toast('✓ Login successful');
+  }catch(pe){
+    console.error(pe);
+    if(msg)msg.textContent='❌ Login ho gaya, panel open fail: '+(pe.message||pe)+' — page refresh karke Google login try karein.';
+    toast('❌ Panel open failed');
+  }
  }catch(e){
-  if(msg)msg.textContent='❌ Network/Login error: '+(e.message||e);
+  console.error(e);
+  if(msg)msg.textContent='❌ '+(e.message||e);
   toast('❌ Login failed');
  }
+}
+async function resetPassword(){
+  const email=(document.getElementById('topEmail')?.value||'').trim().toLowerCase();
+  const msg=document.getElementById('authMsg');
+  if(!email){if(msg)msg.textContent='❌ Pehle Email box me apna email likho, phir Password Reset dabao.';return}
+  if(msg)msg.textContent='⏳ Password reset email bheji ja rahi hai…';
+  try{
+    const redirectTo=window.location.origin+window.location.pathname;
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+    if(error){if(msg)msg.textContent='❌ '+error.message;return}
+    if(msg)msg.textContent='✓ Reset link Email (Inbox/Spam) pe bhej diya. Link khol ke naya password set karo, phir login karo.';
+    toast('✓ Reset email sent');
+  }catch(e){if(msg)msg.textContent='❌ '+(e.message||e)}
 }
 async function googleAuth(){
  explicitManagementLogin=true;
@@ -1143,9 +1191,15 @@ async function topSignup(){
 async function openManagement(user){
  if(!user){toast('❌ Login required');return}
  currentAuthUser=user;
+ try{closeAuthPanel()}catch(_){}
+ try{document.getElementById('authPanel')?.classList.remove('open')}catch(_){}
  await loadSettings();
  await ensureUserProfile(user);
- await applyManagementAccess(user);
+ const ok=await applyManagementAccess(user);
+ if(ok===false){
+   // pending user — show auth again with message
+   try{openAuthPanel()}catch(_){}
+ }
 }
 function closeManagement(){clearManagementFilePicker();try{localStorage.removeItem('mbus_management_active_card')}catch(e){}toggleManagementMenu(false);document.getElementById('managementPanel').classList.remove('open');document.body.style.overflow=''}
 
@@ -2531,8 +2585,13 @@ window.addEventListener('unhandledrejection',e=>{console.error('Unhandled promis
 
 <script>
 (function(){
-  async function adminBoot(){
+  async function adminBoot(tries){
+    tries=tries||0;
     try{
+      if(typeof sb==='undefined'||!sb?.auth){
+        if(tries<20)return setTimeout(()=>adminBoot(tries+1),250);
+        return openAuthPanel();
+      }
       const {data}=await sb.auth.getSession();
       if(data?.session?.user){
         explicitManagementLogin=true;
@@ -2540,10 +2599,13 @@ window.addEventListener('unhandledrejection',e=>{console.error('Unhandled promis
       }else{
         openAuthPanel();
       }
-    }catch(e){try{openAuthPanel()}catch(_){}} 
+    }catch(e){
+      console.warn('adminBoot',e);
+      try{openAuthPanel()}catch(_){}
+    }
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(adminBoot,400));
-  else setTimeout(adminBoot,400);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>adminBoot(0),300));
+  else setTimeout(()=>adminBoot(0),300);
 })();
 </script>
 
