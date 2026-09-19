@@ -917,6 +917,14 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
       <div><h2 id="managerTitle">⚙️ Management Panel</h2><p id="managerRole">Access check हो रहा है…</p></div>
       <button class="manager-close" onclick="closeManagement()">✕ Close Panel</button>
     </div>
+    <div class="manager-card" id="setPasswordCard" style="margin-bottom:18px;max-width:520px">
+      <h3>🔑 Email/Password Login set karein</h3>
+      <p class="access-help">Google se login kiya hai to password abhi set nahi hota. Yahan password set karo — phir Email + Password se bhi login chalega.</p>
+      <div class="field"><label>Naya Password</label><input id="newAccountPass" type="password" placeholder="min 6 characters"></div>
+      <div class="field"><label>Password dobara</label><input id="newAccountPass2" type="password" placeholder="Confirm password"></div>
+      <button type="button" onclick="setAccountPassword()" style="background:#160b00;color:#ffd966;padding:12px 16px;border:0;border-radius:10px;font-weight:800;cursor:pointer">💾 Password Save</button>
+      <p id="setPassMsg" class="access-help" style="margin-top:8px"></p>
+    </div>
 
     <div id="currentUserIdCard" class="current-user-id-card"></div>
     <button type="button" class="management-menu-trigger management-menu-top-trigger" aria-label="Open Management Menu" onclick="toggleManagementMenu(true)">☰</button>
@@ -1158,6 +1166,23 @@ function isValidPersonName(name){
 }
 
 
+async function setAccountPassword(){
+  const msg=document.getElementById('setPassMsg');
+  const p1=document.getElementById('newAccountPass')?.value||'';
+  const p2=document.getElementById('newAccountPass2')?.value||'';
+  if(p1.length<6){if(msg)msg.textContent='❌ Password kam se kam 6 characters.';return}
+  if(p1!==p2){if(msg)msg.textContent='❌ Dono password same hone chahiye.';return}
+  if(msg)msg.textContent='⏳ Password save ho raha hai…';
+  try{
+    const {data:sess}=await sb.auth.getSession();
+    if(!sess?.session?.user){if(msg)msg.textContent='❌ Pehle login karein.';return}
+    const {error}=await sb.auth.updateUser({password:p1});
+    if(error){if(msg)msg.textContent='❌ '+error.message;return}
+    if(msg)msg.textContent='✓ Password set ho gaya! Ab Email + Password se bhi login chalega.';
+    toast('✓ Password saved');
+    try{document.getElementById('newAccountPass').value='';document.getElementById('newAccountPass2').value=''}catch(_){}
+  }catch(e){if(msg)msg.textContent='❌ '+(e.message||e)}
+}
 async function topSignup(){
  const name=document.getElementById('signupName')?.value.trim(),dob=document.getElementById('signupDob')?.value,
  phoneRaw=document.getElementById('signupPhone')?.value.trim(),email=(document.getElementById('signupEmail')?.value||'').trim().toLowerCase(),
