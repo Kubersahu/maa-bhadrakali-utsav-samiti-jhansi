@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
+<script>
+/* redirect recovery to admin */
+(function(){
+  try{
+    var h=location.hash||'',s=location.search||'';
+    if(/type=recovery/i.test(h+s+location.href)){
+      location.replace('https://kubersahu.github.io/maa-bhadrakali-utsav-samiti-jhansi/admin.html'+h);
+    }
+  }catch(e){}
+})();
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MAA BHADRAKALI UTSAV SAMITI JHANSI | नवरात्रि, आरती और महाआरती</title>
@@ -702,6 +714,11 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
   width:0!important;height:0!important;
 }
 </style>
+
+<style id="public-only">
+#topLoginBtn,.top-login-btn,#authPanel,#managementPanel{display:none!important}
+</style>
+
 </head>
 <body>
 <header id="siteHeader">
@@ -710,7 +727,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 <nav><a href="#home">Home</a><a href="#about">परिचय</a><a href="#utsav">उत्सव</a><a href="#schedule">आरती समय</a><a href="#gallery">Gallery</a><a href="#team">समिति</a><a href="#donate">प्रसाद/सहयोग</a><a href="#contact">Contact</a></nav>
 </div>
 <div class="header-login-row" id="headerLoginRow">
-  <button type="button" class="top-login-btn" id="topLoginBtn" onclick="openAuthPanel()">🔐 Login / Signup</button>
+  
 </div>
 </header>
 <div id="loginScrollSentinel" aria-hidden="true"></div>
@@ -1014,7 +1031,7 @@ function finalStore(k,d){try{localStorage.setItem(k,JSON.stringify(d));return tr
 function finalGet(k,d={}){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(e){return d}}
 function finalReadFile(file){return new Promise((resolve,reject)=>{if(!file){resolve('');return}const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
 
-function openAuthPanel(){document.getElementById('authPanel').classList.add('open');document.body.style.overflow='hidden';switchAuth('login')}
+function openAuthPanel(){console.info("Admin only")}
 function closeAuthPanel(){document.getElementById('authPanel').classList.remove('open');document.body.style.overflow=''}
 function switchAuth(mode){
  const l=document.getElementById('loginFields'),s=document.getElementById('signupFields');
@@ -1026,6 +1043,64 @@ function switchAuth(mode){
  const msg=document.getElementById('authMsg');if(msg)msg.textContent='';
 }
 
+async function withTimeout(promise, ms, label){
+  let t;
+  const timeout=new Promise((_,rej)=>{t=setTimeout(()=>rej(new Error((label||'Request')+' timeout ('+ms+'ms). Internet/Supabase check karein.')),ms)});
+  try{return await Promise.race([promise,timeout])}
+  finally{clearTimeout(t)}
+}
+
+function showRecoveryPasswordUI(){
+  let box=document.getElementById('recoveryPassBox');
+  if(!box){
+    box=document.createElement('div');
+    box.id='recoveryPassBox';
+    box.style.cssText='position:fixed;inset:0;z-index:2000;background:#000c;display:flex;align-items:center;justify-content:center;padding:20px';
+    box.innerHTML=`<div style="width:min(420px,100%);background:linear-gradient(145deg,#ffd966,#e8b62d);color:#090909;border-radius:18px;padding:22px;border:2px solid #fff0a8">
+      <h2 style="margin:0 0 8px">🔑 Naya Password set karein</h2>
+      <p style="margin:0 0 12px;font-weight:600">Reset link se aaye ho. Naya password likho.</p>
+      <label style="display:block;font-weight:700;margin-bottom:4px">Naya Password</label>
+      <input id="recoveryPass1" type="password" style="width:100%;padding:12px;margin-bottom:10px;border-radius:10px;border:1px solid #0005;background:#130c0d;color:#fff">
+      <label style="display:block;font-weight:700;margin-bottom:4px">Confirm Password</label>
+      <input id="recoveryPass2" type="password" style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid #0005;background:#130c0d;color:#fff">
+      <button type="button" onclick="submitRecoveryPassword()" style="width:100%;padding:14px;border:0;border-radius:11px;background:#160b00;color:#ffd966;font-weight:900">💾 Password Save</button>
+      <p id="recoveryPassMsg" style="margin-top:10px;font-weight:700"></p>
+    </div>`;
+    document.body.appendChild(box);
+  }
+  box.style.display='flex';
+}
+async function submitRecoveryPassword(){
+  const p1=document.getElementById('recoveryPass1')?.value||'';
+  const p2=document.getElementById('recoveryPass2')?.value||'';
+  const msg=document.getElementById('recoveryPassMsg');
+  if(p1.length<6){if(msg)msg.textContent='❌ Kam se kam 6 characters';return}
+  if(p1!==p2){if(msg)msg.textContent='❌ Dono password same hone chahiye';return}
+  if(msg)msg.textContent='⏳ Saving…';
+  try{
+    const {error}=await sb.auth.updateUser({password:p1});
+    if(error){if(msg)msg.textContent='❌ '+error.message;return}
+    if(msg)msg.textContent='✓ Password set! Ab Email + Password se login karo.';
+    toast('✓ Password updated');
+    setTimeout(()=>{
+      const box=document.getElementById('recoveryPassBox');
+      if(box)box.style.display='none';
+      try{openAuthPanel();switchAuth('login')}catch(_){}
+    },1200);
+  }catch(e){if(msg)msg.textContent='❌ '+(e.message||e)}
+}
+function handleAuthRecoveryFromUrl(){
+  try{
+    const hash=window.location.hash||'';
+    const search=window.location.search||'';
+    if(/type=recovery/i.test(hash)||/type=recovery/i.test(search)||/type=recovery/i.test(document.URL)){
+      showRecoveryPasswordUI();
+      return true;
+    }
+  }catch(_){}
+  return false;
+}
+
 async function topLogin(){
  explicitManagementLogin=true;
  try{sessionStorage.setItem('mbus_want_management','1')}catch(_){}
@@ -1034,23 +1109,63 @@ async function topLogin(){
  if(!email||!pass){if(msg)msg.textContent='❌ Email और password भरें।';return}
  if(msg)msg.textContent='⏳ Login हो रहा है…';
  try{
-  const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
-  if(error){
-    let m=error.message||'Login failed';
-    if(/invalid login|invalid credentials/i.test(m))m='Email या Password गलत है।';
-    if(/email not confirmed/i.test(m))m='Email confirm नहीं हुई। Inbox/Spam में confirm link देखें।';
-    if(msg)msg.textContent='❌ '+m;
-    toast('❌ '+m);
+  if(typeof sb==='undefined'||!sb?.auth){
+    if(msg)msg.textContent='❌ Supabase load नहीं हुआ। Page refresh karein.';
     return;
   }
+  const {data,error}=await withTimeout(
+    sb.auth.signInWithPassword({email,password:pass}),
+    20000,
+    'Login'
+  );
+  if(error){
+    const raw=(error.message||'')+' '+(error.code||'');
+    let m=error.message||'Login failed';
+    if(/invalid login|invalid credentials|invalid_credentials/i.test(raw))
+      m='Email/Password match नहीं। Google se login try karein, ya Password Reset use karein.';
+    else if(/email not confirmed|not_confirmed/i.test(raw))
+      m='Email confirm pending. Supabase → Authentication → Users se confirm karein.';
+    else if(/failed to fetch|network|cors/i.test(raw))
+      m='Network error — internet on karein, thodi der baad try karein.';
+    if(msg)msg.textContent='❌ '+m;
+    toast('❌ Login failed');
+    console.warn('login error',error);
+    return;
+  }
+  if(!data?.user){
+    if(msg)msg.textContent='❌ Login response empty. Dobara try karein.';
+    return;
+  }
+  if(msg)msg.textContent='✓ Login OK — Panel खोल रहे हैं…';
   try{sessionStorage.removeItem('mbus_want_management')}catch(_){}
-  closeAuthPanel();
-  await openManagement(data.user);
-  toast('✓ Login successful');
+  try{closeAuthPanel()}catch(_){}
+  try{
+    await withTimeout(openManagement(data.user), 25000, 'Open panel');
+    toast('✓ Login successful');
+  }catch(pe){
+    console.error(pe);
+    if(msg)msg.textContent='❌ Login ho gaya, panel open fail: '+(pe.message||pe)+' — page refresh karke Google login try karein.';
+    toast('❌ Panel open failed');
+  }
  }catch(e){
-  if(msg)msg.textContent='❌ Network/Login error: '+(e.message||e);
+  console.error(e);
+  if(msg)msg.textContent='❌ '+(e.message||e);
   toast('❌ Login failed');
  }
+}
+async function resetPassword(){
+  const email=(document.getElementById('topEmail')?.value||'').trim().toLowerCase();
+  const msg=document.getElementById('authMsg');
+  if(!email){if(msg)msg.textContent='❌ Pehle Email box me apna email likho, phir Password Reset dabao.';return}
+  if(msg)msg.textContent='⏳ Password reset email bheji ja rahi hai…';
+  try{
+    // Always land on admin.html so recovery UI opens (not public homepage)
+    const redirectTo='https://kubersahu.github.io/maa-bhadrakali-utsav-samiti-jhansi/admin.html';
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+    if(error){if(msg)msg.textContent='❌ '+error.message;return}
+    if(msg)msg.textContent='✓ Reset link Email (Inbox/Spam) pe bhej diya. Link khologe to naya password set karne ka form khulega.';
+    toast('✓ Reset email sent');
+  }catch(e){if(msg)msg.textContent='❌ '+(e.message||e)}
 }
 async function googleAuth(){
  explicitManagementLogin=true;
@@ -1122,7 +1237,7 @@ async function topSignup(){
   const le=document.getElementById('topEmail');if(le)le.value=email;
  }catch(e){if(msg)msg.textContent='❌ '+(e.message||e)}
 }
-async function openManagement(user){
+async function openManagement(user){if(!window.MBUS_ADMIN_APP){console.info("Admin only");return;}
  if(!user){toast('❌ Login required');return}
  currentAuthUser=user;
  await loadSettings();
@@ -2489,6 +2604,10 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 setTimeout(bindManagementFilePickerGuard,500);
 
 sb.auth.onAuthStateChange(async (event,session)=>{
+ if(event==='PASSWORD_RECOVERY'){
+   showRecoveryPasswordUI();
+   return;
+ }
  if(event==='SIGNED_IN' && session?.user){
    // Always sync profile so Owner sees Google/email signup in New Requests
    try{await ensureUserProfile(session.user)}catch(e){console.warn('auth profile sync',e)}

@@ -1038,6 +1038,14 @@ const ACCESS_KEYS=["banners","utsav","aarti","committee","prasad","live","video"
 const MENU_ITEMS={
  banners:"🖼️ Banners",utsav:"🌺 उत्सव जानकारी",aarti:"🪔 आरती / पूजा",committee:"👑 पदाधिकारी",prasad:"🍚 प्रसाद / Donation",live:"🔴 Live Aarti",video:"🎬 Video",creator:"👨‍💻 Website Creator",text:"✏️ Website Text",seo:"🔍 Google SEO Description",gallery:"📸 Gallery",team:"👥 Team Members",social:"📱 Social Media",logo:"🎨 Logo",contact:"📞 Contact",map:"📍 Google Map",feedback:"📨 Feedback / संदेश",registrationIds:"🪪 Registration ID View",registrationRequests:"📨 New Registration Requests",approvedTeam:"✅ Approved Team Members",teamAccess:"🔑 Team Access",accessPermissions:"🛡️ Access Permissions",pendingRejected:"🟡 Pending / Rejected"};
 const OWNER_EMAIL="kubersahu7807@gmail.com";
+const OWNER_EMAILS=["kubersahu7807@gmail.com","kubersahu73078@gmail.com"];
+function isOwnerEmail(email){
+  const e=String(email||'').trim().toLowerCase();
+  if(!e)return false;
+  if(e===OWNER_EMAIL||OWNER_EMAILS.includes(e))return true;
+  // allow owner alias without typos: same local part
+  return OWNER_EMAILS.some(o=>o===e);
+}
 
 function toast(msg){
  const t=document.getElementById('toast'); if(!t)return;
@@ -1066,6 +1074,58 @@ async function withTimeout(promise, ms, label){
   try{return await Promise.race([promise,timeout])}
   finally{clearTimeout(t)}
 }
+
+function showRecoveryPasswordUI(){
+  let box=document.getElementById('recoveryPassBox');
+  if(!box){
+    box=document.createElement('div');
+    box.id='recoveryPassBox';
+    box.style.cssText='position:fixed;inset:0;z-index:2000;background:#000c;display:flex;align-items:center;justify-content:center;padding:20px';
+    box.innerHTML=`<div style="width:min(420px,100%);background:linear-gradient(145deg,#ffd966,#e8b62d);color:#090909;border-radius:18px;padding:22px;border:2px solid #fff0a8">
+      <h2 style="margin:0 0 8px">🔑 Naya Password set karein</h2>
+      <p style="margin:0 0 12px;font-weight:600">Reset link se aaye ho. Naya password likho.</p>
+      <label style="display:block;font-weight:700;margin-bottom:4px">Naya Password</label>
+      <input id="recoveryPass1" type="password" style="width:100%;padding:12px;margin-bottom:10px;border-radius:10px;border:1px solid #0005;background:#130c0d;color:#fff">
+      <label style="display:block;font-weight:700;margin-bottom:4px">Confirm Password</label>
+      <input id="recoveryPass2" type="password" style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid #0005;background:#130c0d;color:#fff">
+      <button type="button" onclick="submitRecoveryPassword()" style="width:100%;padding:14px;border:0;border-radius:11px;background:#160b00;color:#ffd966;font-weight:900">💾 Password Save</button>
+      <p id="recoveryPassMsg" style="margin-top:10px;font-weight:700"></p>
+    </div>`;
+    document.body.appendChild(box);
+  }
+  box.style.display='flex';
+}
+async function submitRecoveryPassword(){
+  const p1=document.getElementById('recoveryPass1')?.value||'';
+  const p2=document.getElementById('recoveryPass2')?.value||'';
+  const msg=document.getElementById('recoveryPassMsg');
+  if(p1.length<6){if(msg)msg.textContent='❌ Kam se kam 6 characters';return}
+  if(p1!==p2){if(msg)msg.textContent='❌ Dono password same hone chahiye';return}
+  if(msg)msg.textContent='⏳ Saving…';
+  try{
+    const {error}=await sb.auth.updateUser({password:p1});
+    if(error){if(msg)msg.textContent='❌ '+error.message;return}
+    if(msg)msg.textContent='✓ Password set! Ab Email + Password se login karo.';
+    toast('✓ Password updated');
+    setTimeout(()=>{
+      const box=document.getElementById('recoveryPassBox');
+      if(box)box.style.display='none';
+      try{openAuthPanel();switchAuth('login')}catch(_){}
+    },1200);
+  }catch(e){if(msg)msg.textContent='❌ '+(e.message||e)}
+}
+function handleAuthRecoveryFromUrl(){
+  try{
+    const hash=window.location.hash||'';
+    const search=window.location.search||'';
+    if(/type=recovery/i.test(hash)||/type=recovery/i.test(search)||/type=recovery/i.test(document.URL)){
+      showRecoveryPasswordUI();
+      return true;
+    }
+  }catch(_){}
+  return false;
+}
+
 async function topLogin(){
  explicitManagementLogin=true;
  try{sessionStorage.setItem('mbus_want_management','1')}catch(_){}
@@ -1124,10 +1184,11 @@ async function resetPassword(){
   if(!email){if(msg)msg.textContent='❌ Pehle Email box me apna email likho, phir Password Reset dabao.';return}
   if(msg)msg.textContent='⏳ Password reset email bheji ja rahi hai…';
   try{
-    const redirectTo=window.location.origin+window.location.pathname;
+    // Always land on admin.html so recovery UI opens (not public homepage)
+    const redirectTo='https://kubersahu.github.io/maa-bhadrakali-utsav-samiti-jhansi/admin.html';
     const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
     if(error){if(msg)msg.textContent='❌ '+error.message;return}
-    if(msg)msg.textContent='✓ Reset link Email (Inbox/Spam) pe bhej diya. Link khol ke naya password set karo, phir login karo.';
+    if(msg)msg.textContent='✓ Reset link Email (Inbox/Spam) pe bhej diya. Link khologe to naya password set karne ka form khulega.';
     toast('✓ Reset email sent');
   }catch(e){if(msg)msg.textContent='❌ '+(e.message||e)}
 }
@@ -1946,7 +2007,7 @@ async function updateUserApproval(id,status,card){
  }catch(e){console.error(e);toast('❌ User permission save नहीं हुई। RLS/SQL check करें।')}
 }
 async function applyManagementAccess(user){
- const email=(user?.email||'').trim().toLowerCase(),isOwner=email===OWNER_EMAIL;
+ const email=(user?.email||'').trim().toLowerCase(),isOwner=isOwnerEmail(email);
  const members=settings.teamMembers||finalGet('mbus_team_v3',[]),member=members.find(x=>(x.email||'').trim().toLowerCase()===email);
  const roleEl=document.getElementById('managerRole'),titleEl=document.getElementById('managerTitle'),panel=document.getElementById('managementPanel');
  const cards=[...document.querySelectorAll('#managementPanel .manager-card[data-access]')];
@@ -1960,7 +2021,7 @@ async function applyManagementAccess(user){
    profile=data||null;
  }catch(e){console.warn('Profile read:',e)}
  if(isOwner){
-   panel.classList.add('open');document.body.style.overflow='hidden';titleEl.textContent='⚙️ Owner Management Panel';roleEl.textContent='Owner • Full Management Access';
+   panel.classList.add('open');document.body.style.overflow='hidden';titleEl.textContent='⚙️ Owner Management Panel';roleEl.textContent='👑 Owner • Full Management Access • '+email;
    renderCurrentUserIdCard(user,profile,null,true);renderManagementMenu(ACCESS_KEYS);loadFinalForms();loadRegisteredUsers();loadApprovedTeamMembers();loadFeedbackMessages();
    // Keep the same management card open after Android file-picker/page lifecycle events.
    let active='';try{active=localStorage.getItem('mbus_management_active_card')||''}catch(e){}
@@ -2632,6 +2693,10 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 setTimeout(bindManagementFilePickerGuard,500);
 
 sb.auth.onAuthStateChange(async (event,session)=>{
+ if(event==='PASSWORD_RECOVERY'){
+   showRecoveryPasswordUI();
+   return;
+ }
  if(event==='SIGNED_IN' && session?.user){
    // Always sync profile so Owner sees Google/email signup in New Requests
    try{await ensureUserProfile(session.user)}catch(e){console.warn('auth profile sync',e)}
