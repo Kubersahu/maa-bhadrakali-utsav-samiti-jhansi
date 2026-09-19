@@ -1,9 +1,27 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
+
+<script>
+// Admin app mode: skip public chrome, go to login/management
+document.documentElement.classList.add('admin-app-mode');
+window.MBUS_ADMIN_APP=true;
+</script>
+<style>
+.admin-app-mode body>header,
+.admin-app-mode body>nav,
+.admin-app-mode body>main,
+.admin-app-mode body>footer,
+.admin-app-mode .top-login-btn,
+.admin-app-mode #topLoginBtn{display:none!important}
+.admin-app-mode body{background:#120a00;min-height:100vh}
+.admin-app-mode #authPanel{display:flex!important;align-items:center;justify-content:center}
+.admin-app-mode #authPanel:not(.open){/* still allow open class */}
+</style>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MAA BHADRAKALI UTSAV SAMITI JHANSI | नवरात्रि, आरती और महाआरती</title>
+<title>MBUS Admin Panel — MAA BHADRAKALI UTSAV SAMITI JHANSI</title>
 <meta name="description" content="MAA BHADRAKALI UTSAV SAMITI JHANSI की आधिकारिक वेबसाइट। झाँसी के तल्लैया मोहल्ला में माँ भद्रकाली के नवरात्रि उत्सव, माता आगमन, पूजा, आरती, महाआरती, प्रसाद, धार्मिक कार्यक्रम और उत्सव की सभी महत्वपूर्ण जानकारी यहाँ प्राप्त करें।">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <link rel="canonical" href="https://kubersahu.github.io/maa-bhadrakali-utsav-samiti-jhansi/">
@@ -702,11 +720,6 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
   width:0!important;height:0!important;
 }
 </style>
-
-<style id="public-only">
-#topLoginBtn,.top-login-btn,#authPanel,#managementPanel{display:none!important}
-</style>
-
 </head>
 <body>
 <header id="siteHeader">
@@ -715,7 +728,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 <nav><a href="#home">Home</a><a href="#about">परिचय</a><a href="#utsav">उत्सव</a><a href="#schedule">आरती समय</a><a href="#gallery">Gallery</a><a href="#team">समिति</a><a href="#donate">प्रसाद/सहयोग</a><a href="#contact">Contact</a></nav>
 </div>
 <div class="header-login-row" id="headerLoginRow">
-  
+  <button type="button" class="top-login-btn" id="topLoginBtn" onclick="openAuthPanel()">🔐 Login / Signup</button>
 </div>
 </header>
 <div id="loginScrollSentinel" aria-hidden="true"></div>
@@ -1019,7 +1032,7 @@ function finalStore(k,d){try{localStorage.setItem(k,JSON.stringify(d));return tr
 function finalGet(k,d={}){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(e){return d}}
 function finalReadFile(file){return new Promise((resolve,reject)=>{if(!file){resolve('');return}const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
 
-function openAuthPanel(){console.info("Admin only")}
+function openAuthPanel(){document.getElementById('authPanel').classList.add('open');document.body.style.overflow='hidden';switchAuth('login')}
 function closeAuthPanel(){document.getElementById('authPanel').classList.remove('open');document.body.style.overflow=''}
 function switchAuth(mode){
  const l=document.getElementById('loginFields'),s=document.getElementById('signupFields');
@@ -1127,7 +1140,7 @@ async function topSignup(){
   const le=document.getElementById('topEmail');if(le)le.value=email;
  }catch(e){if(msg)msg.textContent='❌ '+(e.message||e)}
 }
-async function openManagement(user){if(!window.MBUS_ADMIN_APP){console.info("Admin only");return;}
+async function openManagement(user){
  if(!user){toast('❌ Login required');return}
  currentAuthUser=user;
  await loadSettings();
@@ -2515,6 +2528,25 @@ sb.auth.onAuthStateChange(async (event,session)=>{
 });
 window.addEventListener('unhandledrejection',e=>{console.error('Unhandled promise:',e.reason);toast('❌ कोई online operation पूरा नहीं हुआ। फिर से Save करें।')});
 </script>
+
+<script>
+(function(){
+  async function adminBoot(){
+    try{
+      const {data}=await sb.auth.getSession();
+      if(data?.session?.user){
+        explicitManagementLogin=true;
+        await openManagement(data.session.user);
+      }else{
+        openAuthPanel();
+      }
+    }catch(e){try{openAuthPanel()}catch(_){}} 
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(adminBoot,400));
+  else setTimeout(adminBoot,400);
+})();
+</script>
+
 </body>
 
 
