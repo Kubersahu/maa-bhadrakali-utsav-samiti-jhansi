@@ -915,7 +915,10 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
   <div class="manager-wrap">
     <div class="manager-top">
       <div><h2 id="managerTitle">⚙️ Management Panel</h2><p id="managerRole">Access check हो रहा है…</p></div>
-      <button class="manager-close" onclick="closeManagement()">✕ Close Panel</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="manager-close" type="button" onclick="logoutUser()" style="background:#5a0000;border-color:#5a0000;color:#ffd966">🚪 Logout</button>
+        <button class="manager-close" type="button" onclick="closeManagement()">✕ Close Panel</button>
+      </div>
     </div>
     <div class="manager-card" id="setPasswordCard" style="margin-bottom:18px;max-width:520px">
       <h3>🔑 Email/Password Login set karein</h3>
@@ -1227,6 +1230,22 @@ async function openManagement(user){
  }
 }
 function closeManagement(){clearManagementFilePicker();try{localStorage.removeItem('mbus_management_active_card')}catch(e){}toggleManagementMenu(false);document.getElementById('managementPanel').classList.remove('open');document.body.style.overflow=''}
+async function logoutUser(){
+  try{
+    explicitManagementLogin=false;
+    try{sessionStorage.removeItem('mbus_want_management')}catch(_){}
+    currentAuthUser=null;
+    closeManagement();
+    await sb.auth.signOut();
+    toast('✓ Logout ho gaya');
+    openAuthPanel();
+    const msg=document.getElementById('authMsg');
+    if(msg)msg.textContent='✓ Logout successful. Dubara login karein.';
+  }catch(e){
+    toast('❌ Logout: '+(e.message||e));
+    try{openAuthPanel()}catch(_){}
+  }
+}
 
 function fillForm(){
  const map={mYears:'years',mNavratri:'navratri',mArrival:'arrival',mMaha:'maha',mShringar:'shringar',mMorning:'morning',mEveningAarti:'eveningAarti',mMahaAarti:'mahaAarti',mPrasad:'prasad',mPandit:'pandit',mPresident:'president',mTreasurer:'treasurer',mUpi:'upi',mDonation:'donation',mPhone:'phone',mEmail:'email',mAddress:'address',mMap:'map'};
