@@ -887,7 +887,7 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
   </div>
 </div>
 <div class="field" id="otpFieldWrap" style="display:none">
-  <label>Mobile OTP (6 अंक)</label>
+  <label>Email OTP (6 अंक) — Inbox/Spam check करें</label>
   <div style="display:flex;gap:8px;align-items:stretch">
     <input id="signupOtp" type="tel" inputmode="numeric" maxlength="6" placeholder="OTP लिखें" style="flex:1">
     <button type="button" class="auth-action" style="width:auto;margin:0;padding:12px 14px;white-space:nowrap" onclick="verifySignupOtp()">Verify</button>
@@ -896,12 +896,12 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
 </div>
 <div class="field"><label>Email</label><input id="signupEmail" type="email" placeholder="असली Gmail / Email"></div>
 <div class="field"><label>Password</label><input id="signupPassword" type="password" placeholder="Password"></div>
-<button class="auth-action" id="btnCreateAccount" onclick="topSignup()" disabled style="opacity:.45">Create Account (पहले OTP Verify करें)</button>
+<button class="auth-action" id="btnCreateAccount" onclick="topSignup()" disabled style="opacity:.45">Create Account (पहले Email OTP Verify करें)</button>
 <div class="auth-divider"><span>या</span></div>
 <button type="button" class="google-auth-btn" onclick="googleAuth()">🇬 Continue with Google</button>
-<p class="auth-note" style="margin-top:8px">⚠️ बिना Mobile OTP verify किए registration request नहीं जाएगी।</p>
+<p class="auth-note" style="margin-top:8px">⚠️ बिना Email OTP verify किए request नहीं जाएगी। Mobile 10-digit सही होना ज़रूरी है।</p>
 </div>
-<div id="authMsg" class="auth-note"></div><div class="auth-note">🔒 Email/Password और Google दोनों login/signup सीधे Supabase Auth से होंगे। Owner ही team access approve/manage करेगा।</div></div></div>
+<div id="authMsg" class="auth-note"></div><div class="auth-note">🔒 Signup से पहले Email OTP verify ज़रूरी है। Mobile सही 10-digit होना चाहिए। Owner approval के बाद access मिलेगा।</div></div></div>
 
 
 <div id="managementPanel">
@@ -1106,7 +1106,7 @@ function setCreateAccountEnabled(on){
   if(!btn)return;
   btn.disabled=!on;
   btn.style.opacity=on?'1':'.45';
-  btn.textContent=on?'Create Account':'Create Account (पहले OTP Verify करें)';
+  btn.textContent=on?'Create Account':'Create Account (पहले Email OTP Verify करें)';
 }
 function resetSignupOtpUi(){
   window._signupOtp={phone:'',code:'',expires:0,verified:false,sending:false};
@@ -1118,159 +1118,153 @@ function resetSignupOtpUi(){
 async function getSmsApiKey(){
   let key=(settings&&settings.smsApiKey)||finalGet('mbus_sms_api_key','')||'';
   if(key)return String(key).trim();
-  // try remote site_settings (public read) so signup page also gets Owner-saved key
   try{
     const {data}=await sb.from('site_settings').select('settings').eq('id',1).maybeSingle();
-    const k=data?.settings?.smsApiKey||data?.settings?.extras?.smsApiKey||'';
+    const k=data?.settings?.smsApiKey||'';
     if(k){finalStore('mbus_sms_api_key',k);if(settings)settings.smsApiKey=k;return String(k).trim()}
   }catch(e){console.warn('sms key remote',e)}
   return '';
 }
+async function fast2smsRequest(apiUrl){
+  // 1) direct
+  try{
+    const res=await fetch(apiUrl,{method:'GET',cache:'no-store'});
+    const text=await res.text();
+    let j={};try{j=JSON.parse(text)}catch(_){j={raw:text,status:res.status}}
+    return j;
+  }catch(e1){
+    console.warn('direct f2s',e1);
+  }
+  // 2) cors proxies (so we can read real Fast2SMS JSON)
+  const proxies=[
+    'https://corsproxy.io/?'+encodeURIComponent(apiUrl),
+    'https://api.allorigins.win/raw?url='+encodeURIComponent(apiUrl)
+  ];
+  for(const p of proxies){
+    try{
+      const res=await fetch(p,{method:'GET',cache:'no-store'});
+      const text=await res.text();
+      let j={};try{j=JSON.parse(text)}catch(_){j={raw:text}}
+      if(j&&(j.return!==undefined||j.message||j.status_code||j.request_id||j.request_ids))return j;
+    }catch(e){console.warn('proxy f2s',e)}
+  }
+  return null;
+}
 async function deliverOtpSms(phone,otp){
   const key=await getSmsApiKey();
-  const msgText='MAA BHADRAKALI UTSAV SAMITI JHANSI login OTP is '+otp+'. Valid 5 min. Do not share.';
-  if(key){
-    // Try multiple Fast2SMS styles. Browser CORS often blocks reading response,
-    // so we also fire no-cors requests which still reach Fast2SMS servers.
-    const attempts=[];
-    // A) Quick SMS route (works on many free accounts without DLT template)
-    attempts.push('https://www.fast2sms.com/dev/bulkV2?authorization='+encodeURIComponent(key)+'&route=q&message='+encodeURIComponent(msgText)+'&language=english&flash=0&numbers='+encodeURIComponent(phone));
-    // B) OTP route
-    attempts.push('https://www.fast2sms.com/dev/bulkV2?authorization='+encodeURIComponent(key)+'&route=otp&variables_values='+encodeURIComponent(otp)+'&flash=0&numbers='+encodeURIComponent(phone));
-    let smsOk=false, lastErr='';
-    for(const url of attempts){
-      try{
-        const res=await fetch(url,{method:'GET',mode:'cors'});
-        const j=await res.json().catch(()=>({}));
-        console.log('Fast2SMS',j);
-        if(j&&(j.return===true||j.return==='true'||String(j.message||'').toLowerCase().includes('success')||j.request_id||j.request_ids)){
-          smsOk=true;break;
-        }
-        lastErr=JSON.stringify(j);
-        // if CORS readable error about DLT, try next
-      }catch(e){
-        // CORS / network — still fire opaque request so SMS can go out
-        lastErr=String(e&&e.message||e);
-        try{
-          await fetch(url,{method:'GET',mode:'no-cors',cache:'no-store'});
-          smsOk=true; // request left the browser; assume gateway received it
-          break;
-        }catch(e2){lastErr=String(e2&&e2.message||e2)}
-      }
-    }
-    // Also try POST JSON (some accounts prefer this)
-    if(!smsOk){
-      try{
-        const res=await fetch('https://www.fast2sms.com/dev/bulkV2',{
-          method:'POST',
-          headers:{'authorization':key,'Content-Type':'application/json'},
-          body:JSON.stringify({route:'q',message:msgText,language:'english',flash:0,numbers:[phone]})
-        });
-        const j=await res.json().catch(()=>({}));
-        if(j&&(j.return===true||j.return==='true'||j.request_id))smsOk=true;
-        else lastErr=JSON.stringify(j);
-      }catch(e){
-        try{
-          await fetch('https://www.fast2sms.com/dev/bulkV2',{
-            method:'POST',mode:'no-cors',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({route:'q',message:msgText,language:'english',flash:0,numbers:[phone],authorization:key})
-          });
-          smsOk=true;
-        }catch(e2){lastErr=String(e2&&e2.message||e2)}
-      }
-    }
-    if(smsOk){
-      try{await saveRemoteExtras('lastOtpMeta',{phone,sentAt:new Date().toISOString(),via:'fast2sms'})}catch(_){}
+  if(!key){
+    try{await saveRemoteExtras('lastOtpMeta',{phone,sentAt:new Date().toISOString(),via:'local-no-key'})}catch(_){}
+    return {ok:true,via:'local',otp:otp};
+  }
+  const msgText='MAA BHADRAKALI JHANSI OTP is '+otp+'. Valid 5 minutes. Do not share.';
+  // Build query variants — route q is simplest for many accounts
+  const variants=[
+    'https://www.fast2sms.com/dev/bulkV2?authorization='+encodeURIComponent(key)+'&route=q&message='+encodeURIComponent(msgText)+'&language=english&flash=0&numbers='+encodeURIComponent(phone),
+    'https://www.fast2sms.com/dev/bulkV2?authorization='+encodeURIComponent(key)+'&route=otp&variables_values='+encodeURIComponent(otp)+'&flash=0&numbers='+encodeURIComponent(phone)
+  ];
+  let last=null;
+  for(const url of variants){
+    const j=await fast2smsRequest(url);
+    last=j;
+    console.log('Fast2SMS result',j);
+    if(!j)continue;
+    if(j.return===true||j.return==='true'||j.request_id||j.request_ids){
+      try{await saveRemoteExtras('lastOtpMeta',{phone,sentAt:new Date().toISOString(),via:'fast2sms',raw:j})}catch(_){}
       return {ok:true,via:'sms'};
     }
-    console.warn('Fast2SMS failed',lastErr);
-    // Key exists but send failed — still DO NOT show OTP on screen (security)
-    return {ok:false,error:lastErr||'Fast2SMS send failed',via:'sms-fail'};
   }
-  // No API key — local testing only
-  try{await saveRemoteExtras('lastOtpMeta',{phone,sentAt:new Date().toISOString(),via:'local-no-key'})}catch(_){}
-  return {ok:true,via:'local',otp:otp};
+  // Readable failure — do NOT fake success
+  let err='Fast2SMS ne SMS reject kiya';
+  if(last){
+    err=String(last.message||last.raw||JSON.stringify(last)).slice(0,120);
+  }else{
+    err='Network/CORS — Fast2SMS jawab nahi de paya. Delivery Reports check karein.';
+  }
+  try{await saveRemoteExtras('lastOtpMeta',{phone,sentAt:new Date().toISOString(),via:'sms-fail',error:err})}catch(_){}
+  return {ok:false,error:err,via:'sms-fail'};
 }
 async function sendSignupOtp(){
   const msg=document.getElementById('authMsg');
   const phoneRaw=document.getElementById('signupPhone')?.value.trim()||'';
   const email=(document.getElementById('signupEmail')?.value||'').trim().toLowerCase();
   if(!isValidIndianPhone(phoneRaw)){if(msg)msg.textContent='❌ पहले सही 10 अंकों का मोबाइल डालें।';return}
-  if(!email||!isValidEmail(email)){if(msg)msg.textContent='❌ OTP से पहले सही Email भी डालें।';return}
+  if(!email||!isValidEmail(email)){if(msg)msg.textContent='❌ OTP के लिए सही Email डालें।';return}
   if(window._signupOtp.sending)return;
   const phone=normalizeIndianPhone(phoneRaw);
-  // rate limit 45s
-  if(window._signupOtp.phone===phone && Date.now()< (window._signupOtp.sentAt||0)+45000){
-    if(msg)msg.textContent='⏳ OTP पहले ही भेजा जा चुका है। 45 सेकंड बाद फिर try करें।';return;
+  if(window._signupOtp.email===email && Date.now()<(window._signupOtp.sentAt||0)+45000){
+    if(msg)msg.textContent='⏳ OTP पहले भेज चुके हैं। 45 सेकंड बाद try करें।';return;
   }
   window._signupOtp.sending=true;
   const btn=document.getElementById('btnSendOtp');
   if(btn){btn.disabled=true;btn.textContent='भेज रहा…'}
-  if(msg)msg.textContent='⏳ OTP भेजा जा रहा है…';
-  const otp=String(Math.floor(100000+Math.random()*900000));
-  const exp=Date.now()+5*60*1000;
-  window._signupOtp={phone,code:otp,expires:exp,verified:false,sending:true,sentAt:Date.now()};
-  try{sessionStorage.setItem('mbus_otp_v',JSON.stringify({p:phone,h:_otpHash(otp,phone),e:exp}))}catch(_){}
-  const delivered=await deliverOtpSms(phone,otp);
+  if(msg)msg.textContent='⏳ Email पर OTP भेजा जा रहा है…';
+  try{
+    const {data,error}=await sb.auth.signInWithOtp({
+      email,
+      options:{shouldCreateUser:true,data:{phone:phone,full_name:(document.getElementById('signupName')?.value||'').trim()}}
+    });
+    if(error)throw error;
+    window._signupOtp={phone,email,expires:Date.now()+10*60*1000,verified:false,sending:false,sentAt:Date.now(),via:'email'};
+    const wrap=document.getElementById('otpFieldWrap');if(wrap)wrap.style.display='block';
+    const st=document.getElementById('otpStatus');
+    if(st)st.textContent='✓ OTP Email पर भेज दिया — Inbox/Spam देखें';
+    if(msg)msg.textContent='✓ OTP आपके Email ('+email+') पर भेज दिया गया। 6 अंक लिखकर Verify करें।';
+    setCreateAccountEnabled(false);
+    toast('✓ OTP email भेज दी गई');
+  }catch(e){
+    console.error(e);
+    const otp=String(Math.floor(100000+Math.random()*900000));
+    window._signupOtp={phone,email,code:otp,expires:Date.now()+5*60*1000,verified:false,sending:false,sentAt:Date.now(),via:'local'};
+    try{sessionStorage.setItem('mbus_otp_v',JSON.stringify({p:phone,e:email,h:_otpHash(otp,phone+email),x:Date.now()+5*60*1000}))}catch(_){}
+    const wrap=document.getElementById('otpFieldWrap');if(wrap)wrap.style.display='block';
+    const st=document.getElementById('otpStatus');
+    if(st)st.textContent='Local OTP (Supabase Email OTP enable करें)';
+    if(msg)msg.textContent='⚠️ '+(e.message||e)+' | Testing OTP: '+otp;
+    setCreateAccountEnabled(false);
+    toast('⚠️ Email OTP setup check करें');
+  }
   window._signupOtp.sending=false;
   if(btn){btn.disabled=false;btn.textContent='OTP भेजें'}
-  const wrap=document.getElementById('otpFieldWrap');if(wrap)wrap.style.display='block';
-  const st=document.getElementById('otpStatus');
-  setCreateAccountEnabled(false);
-  if(!delivered.ok){
-    // keep otp in memory for retry, but don't show code
-    if(msg)msg.textContent='❌ SMS नहीं गई। Fast2SMS wallet/credit, API Enable, aur key check करें। Error: '+(delivered.error||'').toString().slice(0,80);
-    if(st)st.textContent='SMS fail — key/credit check करें';
-    // still allow verify if we keep code server-side in memory (user must get SMS)
-    // If SMS truly failed, user can't verify — clear code
-    window._signupOtp.code='';
-    try{sessionStorage.removeItem('mbus_otp_v')}catch(_){}
-    return;
-  }
-  if(delivered.via==='local'){
-    if(msg)msg.textContent='✓ OTP: '+otp+' (testing — SMS key missing)। Real SMS ke liye Owner Panel mein Fast2SMS key Save karein.';
-    if(st)st.textContent='Testing OTP — screen pe dikha';
-  }else if(delivered.via==='sms'){
-    if(msg)msg.textContent='✓ OTP SMS आपके मोबाइल '+phone+' पर भेज दिया गया। Inbox / Spam check करें।';
-    if(st)st.textContent='✓ SMS भेज दिया गया — OTP लिखें';
-  }else{
-    if(msg)msg.textContent='✓ OTP भेजने की कोशिश हो गई। Mobile check करें।';
-    if(st)st.textContent='OTP भेजा गया';
-  }
-  toast('✓ OTP process शुरू');
 }
-function verifySignupOtp(){
+async function verifySignupOtp(){
   const msg=document.getElementById('authMsg');
   const entered=(document.getElementById('signupOtp')?.value||'').trim();
+  const email=(document.getElementById('signupEmail')?.value||'').trim().toLowerCase();
   const phone=normalizeIndianPhone(document.getElementById('signupPhone')?.value||'');
   const st=document.getElementById('otpStatus');
   if(!/^\d{6}$/.test(entered)){if(msg)msg.textContent='❌ 6 अंकों का OTP लिखें।';return}
-  if(!window._signupOtp.code||window._signupOtp.phone!==phone){
-    // restore from session
+  if(!email){if(msg)msg.textContent='❌ Email भरें।';return}
+  if(window._signupOtp.via==='email'||!window._signupOtp.code){
     try{
-      const raw=JSON.parse(sessionStorage.getItem('mbus_otp_v')||'null');
-      if(raw&&raw.p===phone&&Date.now()<raw.e&&_otpHash(entered,phone)===raw.h){
-        window._signupOtp={phone,code:entered,expires:raw.e,verified:true,sending:false};
-        setCreateAccountEnabled(true);
-        if(st)st.textContent='✓ Mobile OTP verified';
-        if(msg)msg.textContent='✓ Mobile verify हो गया। अब Create Account दबाएँ।';
-        toast('✓ OTP verified');
-        return;
-      }
-    }catch(_){}
-    if(msg)msg.textContent='❌ पहले OTP भेजें।';return;
+      const {data,error}=await sb.auth.verifyOtp({email,token:entered,type:'email'});
+      if(error)throw error;
+      window._signupOtp.verified=true;
+      window._signupOtp.phone=phone;
+      window._signupOtp.email=email;
+      window._signupOtp.sessionUser=data?.user||null;
+      setCreateAccountEnabled(true);
+      if(st)st.textContent='✓ Email OTP verified';
+      if(msg)msg.textContent='✓ OTP verify हो गया। अब Password भरकर Create Account दबाएँ।';
+      toast('✓ OTP verified');
+      return;
+    }catch(e){
+      console.warn('verifyOtp',e);
+      if(msg)msg.textContent='❌ गलत/expire OTP। '+(e.message||'');
+      setCreateAccountEnabled(false);
+      return;
+    }
   }
-  if(Date.now()>window._signupOtp.expires){if(msg)msg.textContent='❌ OTP expire हो गया। नया OTP भेजें।';setCreateAccountEnabled(false);return}
-  if(entered!==window._signupOtp.code){if(msg)msg.textContent='❌ गलत OTP।';setCreateAccountEnabled(false);return}
-  window._signupOtp.verified=true;
-  setCreateAccountEnabled(true);
-  if(st)st.textContent='✓ Mobile OTP verified';
-  if(msg)msg.textContent='✓ Mobile verify हो गया। अब Create Account दबाएँ।';
-  toast('✓ OTP verified');
+  if(window._signupOtp.code&&entered===window._signupOtp.code&&Date.now()<=window._signupOtp.expires){
+    window._signupOtp.verified=true;
+    setCreateAccountEnabled(true);
+    if(st)st.textContent='✓ OTP verified';
+    if(msg)msg.textContent='✓ OTP verify हो गया। Create Account दबाएँ।';
+    toast('✓ OTP verified');
+    return;
+  }
+  if(msg)msg.textContent='❌ गलत OTP या expire। नया OTP भेजें।';
+  setCreateAccountEnabled(false);
 }
-
-
 async function topSignup(){
  const name=document.getElementById('signupName')?.value.trim(),dob=document.getElementById('signupDob')?.value,
  phoneRaw=document.getElementById('signupPhone')?.value.trim(),email=document.getElementById('signupEmail')?.value.trim().toLowerCase(),
@@ -1280,13 +1274,19 @@ async function topSignup(){
  if(!isValidEmail(email)){if(msg)msg.textContent='❌ सही / असली Email डालें। Fake या temporary email allowed नहीं।';return}
  if(!isValidIndianPhone(phoneRaw)){if(msg)msg.textContent='❌ सही 10 अंकों का भारतीय मोबाइल डालें (6–9 से शुरू)।';return}
  const phone=normalizeIndianPhone(phoneRaw);
- // OTP gate — without verified mobile, no request
- if(!window._signupOtp||!window._signupOtp.verified||window._signupOtp.phone!==phone){
-   if(msg)msg.textContent='❌ पहले Mobile पर OTP भेजकर Verify करें। बिना OTP request नहीं जाएगी।';
+ // OTP gate
+ if(!window._signupOtp||!window._signupOtp.verified){
+   if(msg)msg.textContent='❌ पहले Email OTP भेजकर Verify करें। बिना OTP request नहीं जाएगी।';
    toast('❌ पहले OTP verify करें');
    return;
  }
- if(Date.now()>window._signupOtp.expires){if(msg)msg.textContent='❌ OTP expire। नया OTP भेजें।';window._signupOtp.verified=false;setCreateAccountEnabled(false);return}
+ if(window._signupOtp.phone&&window._signupOtp.phone!==phone){
+   if(msg)msg.textContent='❌ Mobile number OTP के बाद change नहीं कर सकते।';return;
+ }
+ if(window._signupOtp.email&&window._signupOtp.email!==email){
+   if(msg)msg.textContent='❌ Email OTP के बाद change नहीं कर सकते।';return;
+ }
+ if(window._signupOtp.expires&&Date.now()>window._signupOtp.expires){if(msg)msg.textContent='❌ OTP expire। नया OTP भेजें।';window._signupOtp.verified=false;setCreateAccountEnabled(false);return}
 
  if(pass.length<6){if(msg)msg.textContent='❌ Password कम से कम 6 characters का रखें।';return}
  // DOB not in future, age reasonable
