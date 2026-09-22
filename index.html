@@ -1677,8 +1677,23 @@ function renderFinalGalleryMedia(){
  renderFinalGallery('four');
  const se=document.getElementById('gallerySingle');if(se){se.src=d.single||'';se.style.display=d.single?'block':'none'}
  const sc=document.getElementById('gallerySingleCap');if(sc)sc.textContent=d.singleCap||'विशेष उत्सव फोटो';
- for(let i=1;i<=3;i++){const v=document.getElementById('galleryVideo'+i);if(v){if(d['v'+i]){if(v.src!==d['v'+i]){v.src=d['v'+i];v.load()}v.style.display='block'}else{v.removeAttribute('src');v.style.display='none'}}}
- setTimeout(setupVideoAutoplay,300);
+ for(let i=1;i<=3;i++){
+  const v=document.getElementById('galleryVideo'+i);
+  if(!v)continue;
+  const slide=v.closest('.gallery-video-slide');
+  if(d['v'+i]){
+    if(v.getAttribute('src')!==d['v'+i]){v.src=d['v'+i];try{v.load()}catch(_){}}
+    v.style.display='block';
+    if(slide){slide.style.display='flex';slide.dataset.hasVideo='1'}
+  }else{
+    v.removeAttribute('src');
+    try{v.removeAttribute('src');v.load()}catch(_){}
+    v.style.display='none';
+    if(slide){slide.style.display='none';slide.dataset.hasVideo='0'}
+  }
+ }
+ setTimeout(()=>{if(typeof setupVideoAutoplay==='function')setupVideoAutoplay()},300);
+ setTimeout(()=>{if(typeof setupVideoAutoplay==='function')setupVideoAutoplay()},900);
 }
 
 /* ===== COMMITTEE + TEAM ===== */
@@ -2535,7 +2550,11 @@ function setupLoginSticky(){
 }
 
 function setupVideoAutoplay(){
-  const allVideos=[...document.querySelectorAll('#public-videos video, #videoGalleryTrack video, #gallery video')];
+  const allVideos=[...document.querySelectorAll('#public-videos video, #videoGalleryTrack video')]
+    .filter(v=>{
+      const s=(v.getAttribute('src')||v.currentSrc||'').trim();
+      return s && v.style.display!=='none';
+    });
   if(!allVideos.length)return;
   if(videoObserver){try{videoObserver.disconnect()}catch(_){}}
 
@@ -2543,6 +2562,18 @@ function setupVideoAutoplay(){
   let current=null;
 
   function isSoundOn(){return !!window._mbusSoundUnlocked}
+
+  function showSoundBtn(show){
+    const btn=document.getElementById('videoSoundBtn');
+    if(!btn)return;
+    if(show && !isSoundOn()){
+      btn.style.display='block';
+      btn.classList.remove('is-hidden');
+    }else{
+      btn.style.display='none';
+      btn.classList.add('is-hidden');
+    }
+  }
 
   function prep(v){
     v.removeAttribute('controls');
@@ -2554,8 +2585,7 @@ function setupVideoAutoplay(){
     v.playsInline=true;
     v.loop=true;
     v.preload='auto';
-    // Start muted so browser allows autoplay; unmute after first user tap/scroll
-    if(!isSoundOn()){v.muted=true}else{v.muted=false}
+    v.muted=true;
     try{v.volume=1}catch(_){}
   }
   allVideos.forEach(v=>{
@@ -2563,11 +2593,15 @@ function setupVideoAutoplay(){
     v.addEventListener('contextmenu',e=>e.preventDefault());
   });
 
+  function mutePause(v){
+    try{v.pause()}catch(_){}
+    try{v.muted=true}catch(_){}
+  }
+
   function pauseAllExcept(keep){
     allVideos.forEach(v=>{
       if(v===keep)return;
-      try{v.pause()}catch(_){}
-      try{v.muted=true}catch(_){}
+      mutePause(v);
     });
   }
 
@@ -2577,17 +2611,18 @@ function setupVideoAutoplay(){
     current=v;
     const wantSound=isSoundOn();
     try{
+      try{v.volume=1}catch(_){}
       v.muted=!wantSound;
-      if(wantSound){try{v.volume=1}catch(_){}}
       await v.play();
       if(wantSound){
         v.muted=false;
         try{v.volume=1}catch(_){}
       }
     }catch(err){
-      // Browser blocked sound — still play muted
       try{v.muted=true;await v.play()}catch(_){}
     }
+    // if still no sound unlocked, keep CTA visible
+    showSoundBtn(!isSoundOn());
   }
 
   function pickBest(){
@@ -2595,15 +2630,21 @@ function setupVideoAutoplay(){
     ratios.forEach((r,v)=>{
       if(r>bestR){bestR=r;best=v}
     });
-    if(best && bestR>=0.35){
+    if(best && bestR>=0.3){
       if(current!==best || best.paused){
         playActive(best);
-      }else if(isSoundOn() && best.muted){
+      }else if(isSoundOn()){
         try{best.muted=false;best.volume=1}catch(_){}
       }
+      showSoundBtn(!isSoundOn());
     }else{
       pauseAllExcept(null);
       current=null;
+      // hide CTA when no video on screen
+      if(!isSoundOn()){
+        const anyVisible=[...ratios.values()].some(r=>r>=0.3);
+        showSoundBtn(anyVisible);
+      }else showSoundBtn(false);
     }
   }
 
@@ -2612,46 +2653,78 @@ function setupVideoAutoplay(){
       ratios.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
     });
     pickBest();
-  },{threshold:[0,0.15,0.3,0.35,0.5,0.65,0.8,1], rootMargin:'0px 0px -5% 0px'});
+  },{threshold:[0,0.15,0.3,0.4,0.5,0.65,0.8,1], rootMargin:'0px 0px -8% 0px'});
 
   allVideos.forEach(v=>{
     ratios.set(v,0);
     videoObserver.observe(v);
   });
 
-  if(!window._mbusVideoUnlockBound){
-    window._mbusVideoUnlockBound=true;
-    const unlock=()=>{
-      window._mbusSoundUnlocked=true;
-      // Unmute currently playing video immediately after first touch/click/scroll
-      allVideos.forEach(v=>{
-        if(v===current || (!v.paused && v.offsetParent!==null)){
-          try{v.muted=false;v.volume=1}catch(_){}
-        }
-      });
-      if(current){
-        try{current.muted=false;current.volume=1;if(current.paused)current.play().catch(()=>{})}catch(_){}
+  function unlockSound(){
+    window._mbusSoundUnlocked=true;
+    showSoundBtn(false);
+    const list=allVideos;
+    let target=current;
+    if(!target || target.paused){
+      let best=null,bestR=0;
+      ratios.forEach((r,v)=>{if(r>bestR){bestR=r;best=v}});
+      target=best||list[0];
+    }
+    if(target){
+      try{
+        target.muted=false;
+        target.volume=1;
+        target.play().catch(()=>{});
+      }catch(_){}
+    }
+    // unmute any currently playing
+    list.forEach(v=>{
+      if(!v.paused){
+        try{v.muted=false;v.volume=1}catch(_){}
       }
-      pickBest();
-    };
-    document.addEventListener('touchstart',unlock,{passive:true});
-    document.addEventListener('pointerdown',unlock,{passive:true});
-    document.addEventListener('click',unlock,{passive:true});
-    document.addEventListener('scroll',unlock,{passive:true,once:true});
-  }else if(isSoundOn()){
-    // Re-bind after gallery re-render: keep sound on visible video
-    setTimeout(()=>{
-      if(current){try{current.muted=false;current.volume=1}catch(_){}}
-      pickBest();
-    },50);
+    });
+    pickBest();
   }
 
-  setTimeout(pickBest,350);
-  setTimeout(pickBest,900);
+  // Optional button still works
+  const btn=document.getElementById('videoSoundBtn');
+  if(btn && !btn.dataset.bound){
+    btn.dataset.bound='1';
+    btn.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      unlockSound();
+    });
+  }
+
+  // SCROLL = user gesture → volume ON (finger se scroll = ungli use)
+  if(!window._mbusVideoUnlockBound){
+    window._mbusVideoUnlockBound=true;
+    let unlocked=false;
+    const tryUnlock=()=>{
+      if(unlocked||isSoundOn())return;
+      unlocked=true;
+      unlockSound();
+    };
+    // scroll / touch / wheel — pehli baar volume on
+    window.addEventListener('scroll',tryUnlock,{passive:true});
+    window.addEventListener('touchmove',tryUnlock,{passive:true});
+    window.addEventListener('touchstart',tryUnlock,{passive:true});
+    window.addEventListener('wheel',tryUnlock,{passive:true});
+    document.addEventListener('click',tryUnlock,{passive:true});
+  }else if(isSoundOn()){
+    showSoundBtn(false);
+  }
+
+  // agar pehle se scroll ho chuka ho to turant try
+  if(window.scrollY>10){
+    setTimeout(()=>{if(!isSoundOn())unlockSound()},100);
+  }
+
+  showSoundBtn(!isSoundOn());
+  setTimeout(pickBest,300);
+  setTimeout(pickBest,1000);
 }
-
-
-
 
 /* ===== INIT ===== */
 
@@ -2779,6 +2852,12 @@ sb.auth.onAuthStateChange(async (event,session)=>{
 });
 window.addEventListener('unhandledrejection',e=>{console.error('Unhandled promise:',e.reason);toast('❌ कोई online operation पूरा नहीं हुआ। फिर से Save करें।')});
 </script>
+
+<!-- Global video sound unlock — visible until first tap -->
+<button type="button" id="videoSoundBtn" aria-label="Sound on" style="display:none">
+  🔊 आवाज़ चालू करें
+</button>
+
 </body>
 
 
@@ -2961,4 +3040,99 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important}
 .hero-wrap{width:100%!important;max-width:100%!important;padding:0 16px;box-sizing:border-box}
 .hero-text-below{width:min(1000px,100%)!important;margin:0 auto!important}
 </style>
+
+<style id="video-section-fix-v7">
+/* Video section: clean vertical stack, full video visible, no crop mess */
+#public-videos{
+  padding-top:40px!important;
+  padding-bottom:40px!important;
+}
+#public-videos .gallery-slider[data-gallery-slider="video"]{
+  overflow:visible!important;
+  height:auto!important;
+  background:transparent!important;
+  border:0!important;
+}
+#public-videos .gallery-video-track{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:22px!important;
+  width:100%!important;
+  transform:none!important;
+  height:auto!important;
+}
+#public-videos .gallery-video-slide{
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:0!important;
+  border-radius:18px!important;
+  overflow:hidden!important;
+  background:#0a0607!important;
+  border:1px solid #d6a72c33!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+#public-videos .gallery-video-slide[data-has-video="0"]{
+  display:none!important;
+}
+#public-videos .gallery-video-slide.video-landscape{
+  aspect-ratio:16/9!important;
+  height:auto!important;
+}
+#public-videos .gallery-video-slide.video-portrait{
+  aspect-ratio:9/16!important;
+  max-height:85vh!important;
+  height:auto!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  max-width:min(420px,100%)!important;
+}
+#public-videos .gallery-video-slide video{
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  display:block!important;
+  background:#000!important;
+}
+#public-videos .slider-arrow,
+#public-videos .slider-dots{
+  display:none!important;
+}
+</style>
+
+
+<style id="video-sound-btn-css">
+#videoSoundBtn{
+  position:fixed;
+  left:50%;
+  bottom:28px;
+  transform:translateX(-50%);
+  z-index:9999;
+  padding:14px 22px;
+  border-radius:999px;
+  border:2px solid #ffe58a;
+  background:linear-gradient(135deg,#ffd966,#e0aa20);
+  color:#160b00;
+  font-weight:900;
+  font-size:16px;
+  box-shadow:0 10px 30px #000a,0 0 24px #d6a72c88;
+  cursor:pointer;
+  animation:soundPulse 1.4s ease-in-out infinite;
+}
+#videoSoundBtn:active{transform:translateX(-50%) scale(.97)}
+@keyframes soundPulse{
+  0%,100%{box-shadow:0 10px 30px #000a,0 0 18px #d6a72c66}
+  50%{box-shadow:0 12px 36px #000b,0 0 32px #ffd966aa}
+}
+#videoSoundBtn.is-hidden{display:none!important}
+@media(max-width:600px){
+  #videoSoundBtn{font-size:15px;padding:13px 18px;bottom:22px}
+}
+</style>
+
 </html>
