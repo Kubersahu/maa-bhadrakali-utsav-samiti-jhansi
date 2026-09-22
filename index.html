@@ -1302,7 +1302,7 @@ function render(){
  const ap=document.querySelector('#about .section-title p');if(ap)ap.textContent=settings.aboutDesc;
  const ed=document.getElementById('editHeroDesc');if(ed)ed.value=settings.heroDesc;
  const ea=document.getElementById('editAboutDesc');if(ea)ea.value=settings.aboutDesc;
- renderLive();renderDonation();renderBrandSocial();renderFinalStoredBanners();if(settings.gallery)finalStore('mbus_gallery_final',settings.gallery);renderFinalGalleryMedia();renderFinalWebsiteText();renderCreatorInfo();loadCreatorInfo();
+ renderLive();renderDonation();renderBrandSocial();renderFinalStoredBanners();if(typeof setupBannerSliders==='function')setTimeout(setupBannerSliders,500);if(settings.gallery)finalStore('mbus_gallery_final',settings.gallery);renderFinalGalleryMedia();renderFinalWebsiteText();renderCreatorInfo();loadCreatorInfo();
 }
 
 async function loadSettings(){
@@ -1396,9 +1396,80 @@ function remoteSaveWholeSettings(nextSettings){
 
 /* ===== BANNERS ===== */
 const finalSliderState={hero:0,lower:0,four:0,video:0};
-function finalDots(id,count,active,cb){const box=document.getElementById(id);if(box)box.innerHTML='';/* dots disabled */}
-function renderFinalBanner(kind){const track=document.getElementById(kind==='hero'?'heroBannerTrack':'lowerBannerTrack');const count=kind==='hero'?5:2;if(!track)return;track.style.transform=`translateX(-${finalSliderState[kind]*100}%)`;finalDots(kind==='hero'?'heroDots':'lowerDots',count,finalSliderState[kind],i=>{finalSliderState[kind]=i;renderFinalBanner(kind)})}
-function bannerMove(kind,dir){const count=kind==='hero'?5:2;finalSliderState[kind]=(finalSliderState[kind]+dir+count)%count;renderFinalBanner(kind)}
+let bannerTimers={hero:null,lower:null};
+
+function finalDots(id,count,active,cb){
+  const box=document.getElementById(id);
+  if(!box)return;
+  // dots UI hidden by CSS; keep empty
+  box.innerHTML='';
+}
+
+function getBannerSlideCount(kind){
+  const track=document.getElementById(kind==='hero'?'heroBannerTrack':'lowerBannerTrack');
+  if(!track)return 0;
+  const slides=[...track.querySelectorAll('.banner-slide')];
+  // only slides that have a real image src
+  let n=0;
+  slides.forEach(s=>{
+    const img=s.querySelector('img');
+    if(img && img.getAttribute('src') && img.getAttribute('src').trim() && !img.getAttribute('src').includes('data:image/svg')) n++;
+  });
+  // if none loaded yet, fall back to total slides with any src attempt
+  if(n===0){
+    slides.forEach(s=>{
+      const img=s.querySelector('img');
+      if(img && (img.src||'').length>10) n++;
+    });
+  }
+  return Math.max(n,1);
+}
+
+function renderFinalBanner(kind){
+  const track=document.getElementById(kind==='hero'?'heroBannerTrack':'lowerBannerTrack');
+  if(!track)return;
+  const count=getBannerSlideCount(kind);
+  if(finalSliderState[kind]>=count)finalSliderState[kind]=0;
+  if(finalSliderState[kind]<0)finalSliderState[kind]=count-1;
+  track.style.transform=`translateX(-${finalSliderState[kind]*100}%)`;
+  finalDots(kind==='hero'?'heroDots':'lowerDots',count,finalSliderState[kind],i=>{
+    finalSliderState[kind]=i;
+    renderFinalBanner(kind);
+  });
+}
+
+function bannerMove(kind,dir){
+  const count=getBannerSlideCount(kind);
+  if(count<2)return;
+  finalSliderState[kind]=(finalSliderState[kind]+dir+count)%count;
+  renderFinalBanner(kind);
+  // reset auto-timer so user has time to view
+  startBannerAutoplay(kind);
+}
+
+function startBannerAutoplay(kind){
+  if(bannerTimers[kind]){clearInterval(bannerTimers[kind]);bannerTimers[kind]=null}
+  const count=getBannerSlideCount(kind);
+  if(count<2)return;
+  bannerTimers[kind]=setInterval(()=>{
+    bannerMove(kind,1);
+  },6000);
+}
+
+function setupBannerSliders(){
+  renderFinalBanner('hero');
+  renderFinalBanner('lower');
+  startBannerAutoplay('hero');
+  startBannerAutoplay('lower');
+  // swipe
+  const hero=document.querySelector('.hero-banner-slider');
+  const lower=document.querySelector('.lower-banner-slider');
+  if(typeof swipe==='function'){
+    swipe(hero,dir=>bannerMove('hero',dir));
+    swipe(lower,dir=>bannerMove('lower',dir));
+  }
+}
+
 async function saveHeroBanners(){
  const status=document.getElementById('mGalleryList');
  try{
@@ -1455,10 +1526,13 @@ async function saveAllBanners(){
 }
 function renderFinalStoredBanners(){
  const d=settings.banners||finalGet('mbus_banners',{});
- (d.hero||[]).forEach((v,i)=>{const e=document.getElementById('heroBanner'+(i+1));if(e&&v)e.src=v});
- (d.lower||[]).forEach((v,i)=>{const e=document.getElementById('lowerBanner'+(i+1));if(e&&v)e.src=v});
+ (d.hero||[]).forEach((v,i)=>{const e=document.getElementById('heroBanner'+(i+1));if(e&&v){e.src=v;e.loading='eager'}});
+ (d.lower||[]).forEach((v,i)=>{const e=document.getElementById('lowerBanner'+(i+1));if(e&&v){e.src=v;e.loading='eager'}});
  const h=document.getElementById('lowerBannerHeading');if(h)h.textContent=d.lowerHeading||'उत्सव की विशेष झलक';
  const p=document.getElementById('lowerBannerText');if(p)p.textContent=d.lowerText||'माँ भद्रकाली उत्सव की विशेष झलक।';
+ // start / refresh auto slide after images applied
+ setTimeout(()=>{if(typeof setupBannerSliders==='function')setupBannerSliders()},200);
+ setTimeout(()=>{if(typeof setupBannerSliders==='function')setupBannerSliders()},800);
 }
 
 /* ===== GALLERY ===== */
