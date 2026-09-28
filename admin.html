@@ -974,17 +974,20 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
       <div class="manager-card content-editor" id="cardText" data-access="text"><h3>✏️ Website Text</h3><label>Hero Badge</label><input id="editHeroBadge" class="owner-input"><label>Hero Heading</label><textarea id="editHeroTitle" class="owner-textarea"></textarea><label>Hero Description</label><textarea id="editHeroDesc" class="owner-textarea"></textarea><label>About Heading</label><input id="editAboutHeading" class="owner-input"><label>About Description</label><textarea id="editAboutDesc" class="owner-textarea"></textarea><label>Gallery Heading</label><input id="editGalleryHeading" class="owner-input"><label>Gallery Description</label><textarea id="editGalleryText" class="owner-textarea"></textarea><label>Live Aarti Heading</label><input id="editLiveHeading" class="owner-input"><label>Contact Heading</label><input id="editContactHeading" class="owner-input"><label>Contact Description</label><textarea id="editContactText" class="owner-textarea"></textarea><button onclick="saveAllWebsiteText()">💾 Save Website Text</button></div>
       <div class="manager-card" id="cardSeo" data-access="seo"><h3>🔍 Google SEO Description</h3><p>Google Search के लिए अलग description.</p><textarea id="editSeoDescription" class="owner-textarea" placeholder="Google Search description"></textarea><button onclick="saveSeoDescriptionOnly()">💾 Save Google SEO Description</button></div>
       <div class="manager-card" id="cardGallery" data-access="gallery"><h3>📸 Gallery</h3><div class="media-admin-grid gallery-admin-grid"><div class="media-admin-card"><b>Photo 1</b><input id="mGallery1" type="file" accept="image/*"><input id="mCaption1" placeholder="Photo 1 Caption"></div><div class="media-admin-card"><b>Photo 2</b><input id="mGallery2" type="file" accept="image/*"><input id="mCaption2" placeholder="Photo 2 Caption"></div><div class="media-admin-card"><b>Photo 3</b><input id="mGallery3" type="file" accept="image/*"><input id="mCaption3" placeholder="Photo 3 Caption"></div><div class="media-admin-card"><b>Slider Photo 1</b><input id="mGallery4_1" type="file" accept="image/*"></div><div class="media-admin-card"><b>Slider Photo 2</b><input id="mGallery4_2" type="file" accept="image/*"></div><div class="media-admin-card"><b>Slider Photo 3</b><input id="mGallery4_3" type="file" accept="image/*"></div><div class="media-admin-card"><b>Slider Photo 4</b><input id="mGallery4_4" type="file" accept="image/*"></div><div class="media-admin-card"><b>Single Photo</b><input id="mGallerySingle" type="file" accept="image/*"><input id="mCaptionSingle" placeholder="Single Photo Caption"></div></div><button onclick="saveGalleryPhotosOnly()">💾 Save Gallery Photos</button><div id="mGalleryList" class="manager-note">Gallery photos यहाँ manage होंगी।</div></div>
-      <div class="manager-card" id="cardTeam" data-access="team"><h3>👥 Team Members + Photos</h3><p>Yahan uploaded photos ki list, photo change, aur remove — sab control.</p>
-<div style="margin:10px 0 14px;padding:12px;border-radius:12px;background:rgba(0,0,0,.12);border:1px solid #0003">
-  <b style="display:block;margin-bottom:8px">📷 Uploaded Team Photos</b>
-  <div id="teamPhotoManageList" class="team-photo-manage-list"><div class="user-id-empty">Abhi koi team photo nahi.</div></div>
-</div>
-<p style="font-size:13px;margin:8px 0">Naya member add / permissions:</p>
+      <div class="manager-card" id="cardTeam" data-access="team"><h3>👥 Team Members</h3><p>Naye members add karo, permissions set karo, Save dabao. Photos manage: <b>Team Photos</b> menu.</p>
 <div id="teamManagerList" class="team-manager-list"></div>
 <button type="button" onclick="addTeamManagerRow()">➕ Add Team Member</button>
 <button type="button" onclick="saveTeamV3()">💾 Save Team + Permissions</button>
 </div>
-      <div class="manager-card" id="cardSocial" data-access="social"><h3>📱 Social Media</h3><label>Facebook</label><input id="mFacebook" class="owner-input"><label>Instagram 1</label><input id="mInstagram" class="owner-input"><label>Instagram 2</label><input id="mInstagram2" class="owner-input"><label>WhatsApp</label><input id="mWhatsApp" class="owner-input"><label>Threads</label><input id="mThreads" class="owner-input"><label>X / Twitter</label><input id="mX" class="owner-input"><button onclick="saveLogoSocial('social')">💾 Save Social Media</button></div>
+      
+      <div class="manager-card" id="cardTeamPhotos" data-access="teamPhotos">
+        <h3>📷 Team Photos</h3>
+        <p>Jinki photo upload ho chuki hai — unka naam, photo change, aur remove yahin se.</p>
+        <div id="teamPhotoManageList" class="team-photo-manage-list"><div class="user-id-empty">Loading…</div></div>
+        <p style="margin-top:12px;font-size:13px;opacity:.85">Naya member add karne ke liye <b>Team Members</b> menu use karo. Yahan sirf uploaded list manage hoti hai.</p>
+        <button type="button" onclick="renderTeamPhotoManageList()">🔄 Refresh List</button>
+      </div>
+<div class="manager-card" id="cardSocial" data-access="social"><h3>📱 Social Media</h3><label>Facebook</label><input id="mFacebook" class="owner-input"><label>Instagram 1</label><input id="mInstagram" class="owner-input"><label>Instagram 2</label><input id="mInstagram2" class="owner-input"><label>WhatsApp</label><input id="mWhatsApp" class="owner-input"><label>Threads</label><input id="mThreads" class="owner-input"><label>X / Twitter</label><input id="mX" class="owner-input"><button onclick="saveLogoSocial('social')">💾 Save Social Media</button></div>
       <div class="manager-card" id="cardLogo" data-access="logo"><h3>🎨 Logo</h3><label>ऊपर Header Logo</label><input id="mHeaderLogo" class="owner-input" type="file" accept="image/*"><label>बीच वाला बड़ा Logo</label><input id="mMiddleLogo" class="owner-input" type="file" accept="image/*"><button onclick="saveLogoSocial('logo')">💾 Save Logos</button></div>
       <div class="manager-card" id="cardContact" data-access="contact"><h3>📞 Contact</h3><label>फोन</label><input id="mPhone" class="owner-input"><label>ईमेल</label><input id="mEmail" class="owner-input"><label>पूरा पता</label><textarea id="mAddress" class="owner-textarea"></textarea><button onclick="saveSettings()">💾 Save Contact</button></div>
       <div class="manager-card" id="cardMap" data-access="map"><h3>📍 Google Map</h3><label>Google Maps URL</label><input id="mMap" class="owner-input" placeholder="Google Maps share/embed link"><button onclick="saveSettings()">💾 Save Google Map</button>
@@ -1043,9 +1046,9 @@ const defaults={
 let settings={...defaults};
 let currentAuthUser=null;
 let explicitManagementLogin=false;
-const ACCESS_KEYS=["banners","utsav","aarti","committee","prasad","live","video","creator","text","seo","gallery","team","social","logo","contact","map","feedback","registrationIds","registrationRequests","approvedTeam","teamAccess","accessPermissions","pendingRejected"];
+const ACCESS_KEYS=["banners","utsav","aarti","committee","prasad","live","video","creator","text","seo","gallery","team","teamPhotos","social","logo","contact","map","feedback","registrationIds","registrationRequests","approvedTeam","teamAccess","accessPermissions","pendingRejected"];
 const MENU_ITEMS={
- banners:"🖼️ Banners",utsav:"🌺 उत्सव जानकारी",aarti:"🪔 आरती / पूजा",committee:"👑 पदाधिकारी",prasad:"🍚 प्रसाद / Donation",live:"🔴 Live Aarti",video:"🎬 Video",creator:"👨‍💻 Website Creator",text:"✏️ Website Text",seo:"🔍 Google SEO Description",gallery:"📸 Gallery",team:"👥 Team Members",social:"📱 Social Media",logo:"🎨 Logo",contact:"📞 Contact",map:"📍 Google Map",feedback:"📨 Feedback / संदेश",registrationIds:"🪪 Registration ID View",registrationRequests:"📨 New Registration Requests",approvedTeam:"✅ Approved Team Members",teamAccess:"🔑 Team Access",accessPermissions:"🛡️ Access Permissions",pendingRejected:"🟡 Pending / Rejected"};
+ banners:"🖼️ Banners",utsav:"🌺 उत्सव जानकारी",aarti:"🪔 आरती / पूजा",committee:"👑 पदाधिकारी",prasad:"🍚 प्रसाद / Donation",live:"🔴 Live Aarti",video:"🎬 Video",creator:"👨‍💻 Website Creator",text:"✏️ Website Text",seo:"🔍 Google SEO Description",gallery:"📸 Gallery",team:"👥 Team Members",teamPhotos:"📷 Team Photos",social:"📱 Social Media",logo:"🎨 Logo",contact:"📞 Contact",map:"📍 Google Map",feedback:"📨 Feedback / संदेश",registrationIds:"🪪 Registration ID View",registrationRequests:"📨 New Registration Requests",approvedTeam:"✅ Approved Team Members",teamAccess:"🔑 Team Access",accessPermissions:"🛡️ Access Permissions",pendingRejected:"🟡 Pending / Rejected"};
 const OWNER_EMAIL="kubersahu7807@gmail.com";
 const OWNER_EMAILS=["kubersahu7807@gmail.com","kubersahu73078@gmail.com"];
 function isOwnerEmail(email){
@@ -1701,54 +1704,64 @@ function addTeamManagerRow(data={name:'',role:'',email:'',details:'',photo:'',pe
 async function saveTeamV3(){
  const rows=[...document.querySelectorAll('.team-manager-row')],arr=[];
  try{
-  const oldArr=settings.teamMembers||finalGet('mbus_team_v3',[])||[];
-  // Map old members by email + by index for photo keep
+  const oldArr=(settings.teamMembers||finalGet('mbus_team_v3',[])||[]).slice();
   const byEmail={};
-  oldArr.forEach((x,i)=>{if(x&&x.email)byEmail[(x.email||'').trim().toLowerCase()]=x});
+  oldArr.forEach(x=>{
+    const em=(x&&x.email||'').trim().toLowerCase();
+    if(em)byEmail[em]=x;
+  });
+  const seenEmail=new Set();
+  const seenName=new Set();
   for(let idx=0;idx<rows.length;idx++){
    const row=rows[idx];
    const email=(row.querySelector('.tm-email')?.value||'').trim().toLowerCase();
-   const previous=(email&&byEmail[email])||oldArr[idx]||{};
+   const name=(row.querySelector('.tm-name')?.value||'').trim();
+   const previous=(email&&byEmail[email])||{};
+   // also try match by name if no email
+   let prevByName=null;
+   if(!previous.photo&&name){
+     prevByName=oldArr.find(x=>!x.email&&(x.name||'').trim().toLowerCase()===name.toLowerCase())||null;
+   }
+   const base=previous.photo||previous.name?previous:(prevByName||{});
    const f=row.querySelector('.tm-photo')?.files[0];
-   let photo=previous.photo||'';
+   let photo=base.photo||'';
    if(f)photo=await uploadPublicMedia(await compressGalleryImage(f,900),'team');
    const permissions=defaultMemberPermissions();
    row.querySelectorAll('[data-perm]').forEach(cb=>permissions[cb.dataset.perm]=!!cb.checked);
-   const name=row.querySelector('.tm-name')?.value.trim()||'';
-   // skip completely empty rows
    if(!name&&!email&&!photo&&!f)continue;
+   if(email)seenEmail.add(email);
+   if(name)seenName.add(name.toLowerCase());
    arr.push({
-     name,
-     role:row.querySelector('.tm-role')?.value.trim()||'Team Member',
-     email,
-     details:row.querySelector('.tm-details')?.value.trim()||'',
-     phone:previous.phone||'',
-     teamId:previous.teamId||'',
+     name:name||base.name||'',
+     role:row.querySelector('.tm-role')?.value.trim()||base.role||'Team Member',
+     email:email||base.email||'',
+     details:row.querySelector('.tm-details')?.value.trim()||base.details||'',
+     phone:base.phone||'',
+     teamId:base.teamId||'',
      photo,
      permissions
    });
   }
-  // IMPORTANT: also keep old members that are not in the form (so they are not wiped)
-  const formEmails=new Set(arr.map(x=>(x.email||'').trim().toLowerCase()).filter(Boolean));
-  const formNames=new Set(arr.map(x=>(x.name||'').trim().toLowerCase()).filter(Boolean));
+  // NEVER drop old members not currently in form rows
   oldArr.forEach(old=>{
     if(!old)return;
     const em=(old.email||'').trim().toLowerCase();
     const nm=(old.name||'').trim().toLowerCase();
-    if(em&&formEmails.has(em))return;
-    if(!em&&nm&&formNames.has(nm))return;
-    // keep old member if form didn't include them
+    if(em&&seenEmail.has(em))return;
+    if(!em&&nm&&seenName.has(nm))return;
+    if(em&&arr.some(a=>(a.email||'').trim().toLowerCase()===em))return;
+    if(nm&&arr.some(a=>(a.name||'').trim().toLowerCase()===nm&&!(a.email||'')))return;
     if(old.name||old.photo||old.email)arr.push(old);
   });
   settings.teamMembers=arr;
   finalStore('mbus_team_v3',arr);
   const ok=await saveRemoteExtras('teamMembers',arr);
   if(!ok)throw new Error('Team Members online save नहीं हुए।');
-  // refresh form so all saved members show again
   const wrap=document.getElementById('teamManagerList');
   if(wrap){wrap.innerHTML='';arr.forEach(x=>addTeamManagerRow(x))}
+  if(typeof renderTeamPhotoManageList==='function')renderTeamPhotoManageList();
   renderTeamV3();
-  toast('✓ Team Member photo/details save — कुल '+arr.length+' members। सभी phones पर दिखेंगे।');
+  toast('✓ Team save — कुल '+arr.length+' members. Purani photos safe hain.');
  }catch(e){console.error(e);toast('❌ Team save नहीं हुआ: '+(e?.message||'Supabase Storage/RLS check करें।'))}
 }
 function renderTeamV3(){
@@ -2280,7 +2293,7 @@ function toggleManagementMenu(open){
  drawer.classList.toggle('open',!!open);overlay.classList.toggle('open',!!open);
 }
 function openManagementMenu(key){
- try{if(String(arguments[0]||'')==='team'||String(arguments[0]||'')==='cardTeam')renderTeamPhotoManageList()}catch(_){}
+ try{const k=String(arguments[0]||'');if(k==='team'||k==='teamPhotos'||k==='cardTeam'||k==='cardTeamPhotos'){if(typeof renderTeamPhotoManageList==='function')renderTeamPhotoManageList()}}catch(_){}
 
  const target='card'+key.charAt(0).toUpperCase()+key.slice(1),cards=[...document.querySelectorAll('#managementPanel .manager-card[data-access]')];
  cards.forEach(c=>c.style.display='none');
