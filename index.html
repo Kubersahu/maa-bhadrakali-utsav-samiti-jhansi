@@ -987,7 +987,16 @@ footer{position:relative;z-index:2;padding:45px 22px;text-align:center;border-to
       <div class="manager-card content-editor" id="cardText" data-access="text"><h3>✏️ Website Text</h3><label>Hero Badge</label><input id="editHeroBadge" class="owner-input"><label>Hero Heading</label><textarea id="editHeroTitle" class="owner-textarea"></textarea><label>Hero Description</label><textarea id="editHeroDesc" class="owner-textarea"></textarea><label>About Heading</label><input id="editAboutHeading" class="owner-input"><label>About Description</label><textarea id="editAboutDesc" class="owner-textarea"></textarea><label>Gallery Heading</label><input id="editGalleryHeading" class="owner-input"><label>Gallery Description</label><textarea id="editGalleryText" class="owner-textarea"></textarea><label>Live Aarti Heading</label><input id="editLiveHeading" class="owner-input"><label>Contact Heading</label><input id="editContactHeading" class="owner-input"><label>Contact Description</label><textarea id="editContactText" class="owner-textarea"></textarea><button onclick="saveAllWebsiteText()">💾 Save Website Text</button></div>
       <div class="manager-card" id="cardSeo" data-access="seo"><h3>🔍 Google SEO Description</h3><p>Google Search के लिए अलग description.</p><textarea id="editSeoDescription" class="owner-textarea" placeholder="Google Search description"></textarea><button onclick="saveSeoDescriptionOnly()">💾 Save Google SEO Description</button></div>
       <div class="manager-card" id="cardGallery" data-access="gallery"><h3>📸 Gallery</h3><div class="media-admin-grid gallery-admin-grid"><div class="media-admin-card"><b>Photo 1</b><input id="mGallery1" type="file" accept="image/*"><input id="mCaption1" placeholder="Photo 1 Caption"></div><div class="media-admin-card"><b>Photo 2</b><input id="mGallery2" type="file" accept="image/*"><input id="mCaption2" placeholder="Photo 2 Caption"></div><div class="media-admin-card"><b>Photo 3</b><input id="mGallery3" type="file" accept="image/*"><input id="mCaption3" placeholder="Photo 3 Caption"></div><div class="media-admin-card"><b>Slider Photo 1</b><input id="mGallery4_1" type="file" accept="image/*"></div><div class="media-admin-card"><b>Slider Photo 2</b><input id="mGallery4_2" type="file" accept="image/*"></div><div class="media-admin-card"><b>Slider Photo 3</b><input id="mGallery4_3" type="file" accept="image/*"></div><div class="media-admin-card"><b>Slider Photo 4</b><input id="mGallery4_4" type="file" accept="image/*"></div><div class="media-admin-card"><b>Single Photo</b><input id="mGallerySingle" type="file" accept="image/*"><input id="mCaptionSingle" placeholder="Single Photo Caption"></div></div><button onclick="saveGalleryPhotosOnly()">💾 Save Gallery Photos</button><div id="mGalleryList" class="manager-note">Gallery photos यहाँ manage होंगी।</div></div>
-      <div class="manager-card" id="cardTeam" data-access="team"><h3>👥 Team Members</h3><p>हर member की अलग permissions set करें।</p><div id="teamManagerList" class="team-manager-list"></div><button type="button" onclick="addTeamManagerRow()">➕ Add Team Member</button><button type="button" onclick="saveTeamV3()">💾 Save Team + Permissions</button></div>
+      <div class="manager-card" id="cardTeam" data-access="team"><h3>👥 Team Members + Photos</h3><p>Yahan uploaded photos ki list, photo change, aur remove — sab control.</p>
+<div style="margin:10px 0 14px;padding:12px;border-radius:12px;background:rgba(0,0,0,.12);border:1px solid #0003">
+  <b style="display:block;margin-bottom:8px">📷 Uploaded Team Photos</b>
+  <div id="teamPhotoManageList" class="team-photo-manage-list"><div class="user-id-empty">Abhi koi team photo nahi.</div></div>
+</div>
+<p style="font-size:13px;margin:8px 0">Naya member add / permissions:</p>
+<div id="teamManagerList" class="team-manager-list"></div>
+<button type="button" onclick="addTeamManagerRow()">➕ Add Team Member</button>
+<button type="button" onclick="saveTeamV3()">💾 Save Team + Permissions</button>
+</div>
       <div class="manager-card" id="cardSocial" data-access="social"><h3>📱 Social Media</h3><label>Facebook</label><input id="mFacebook" class="owner-input"><label>Instagram 1</label><input id="mInstagram" class="owner-input"><label>Instagram 2</label><input id="mInstagram2" class="owner-input"><label>WhatsApp</label><input id="mWhatsApp" class="owner-input"><label>Threads</label><input id="mThreads" class="owner-input"><label>X / Twitter</label><input id="mX" class="owner-input"><button onclick="saveLogoSocial('social')">💾 Save Social Media</button></div>
       <div class="manager-card" id="cardLogo" data-access="logo"><h3>🎨 Logo</h3><label>ऊपर Header Logo</label><input id="mHeaderLogo" class="owner-input" type="file" accept="image/*"><label>बीच वाला बड़ा Logo</label><input id="mMiddleLogo" class="owner-input" type="file" accept="image/*"><button onclick="saveLogoSocial('logo')">💾 Save Logos</button></div>
       <div class="manager-card" id="cardContact" data-access="contact"><h3>📞 Contact</h3><label>फोन</label><input id="mPhone" class="owner-input"><label>ईमेल</label><input id="mEmail" class="owner-input"><label>पूरा पता</label><textarea id="mAddress" class="owner-textarea"></textarea><button onclick="saveSettings()">💾 Save Contact</button></div>
@@ -1717,26 +1726,59 @@ function addTeamManagerRow(data={name:'',role:'',email:'',details:'',photo:'',pe
  const row=document.createElement('div');row.className='team-manager-row';
  const permHtml=ACCESS_KEYS.map(k=>`<label><input type="checkbox" data-perm="${k}"> ${escapeHtml(permLabel(k))}</label>`).join('');
  row.innerHTML=`<div class="mini-grid"><input class="tm-name" placeholder="Team Member का नाम"><input class="tm-role" placeholder="पद / जिम्मेदारी"></div><input class="tm-email" type="email" placeholder="Supabase Login Email"><textarea class="tm-details" placeholder="छोटा परिचय / जिम्मेदारी"></textarea><input class="tm-photo" type="file" accept="image/*"><div class="tm-permission-box"><b>इस Member को कौन-कौन से menu edit करने हैं:</b><div class="tm-permissions">${permHtml}</div></div><button type="button" class="remove-team" style="margin-top:6px">🗑️ Remove</button>`;
- row.querySelector('.tm-name').value=data.name||'';row.querySelector('.tm-role').value=data.role||'';row.querySelector('.tm-email').value=data.email||'';row.querySelector('.tm-details').value=data.details||'';row.querySelectorAll('[data-perm]').forEach(cb=>cb.checked=!!p[cb.dataset.perm]);row.querySelector('.remove-team').onclick=()=>row.remove();wrap.appendChild(row)
+ row.querySelector('.tm-name').value=data.name||'';row.querySelector('.tm-role').value=data.role||'';row.querySelector('.tm-email').value=data.email||'';row.querySelector('.tm-details').value=data.details||'';row.querySelectorAll('[data-perm]').forEach(cb=>cb.checked=!!p[cb.dataset.perm]);row.querySelector('.remove-team').onclick=()=>row.remove();if(data.photo){const prev=document.createElement('div');prev.style.cssText='margin:8px 0;font-size:12px;font-weight:700';prev.innerHTML='✅ Photo already saved — नई चुनोगे तभी बदलेगी<br><img src="'+String(data.photo).replace(/"/g,'')+'" style="max-width:90px;max-height:90px;border-radius:10px;margin-top:6px;object-fit:cover;border:1px solid #0003">';row.querySelector('.tm-photo').before(prev)}wrap.appendChild(row)
 }
 async function saveTeamV3(){
  const rows=[...document.querySelectorAll('.team-manager-row')],arr=[];
  try{
-  const oldArr=settings.teamMembers||finalGet('mbus_team_v3',[]);
-  for(const row of rows){
+  const oldArr=settings.teamMembers||finalGet('mbus_team_v3',[])||[];
+  // Map old members by email + by index for photo keep
+  const byEmail={};
+  oldArr.forEach((x,i)=>{if(x&&x.email)byEmail[(x.email||'').trim().toLowerCase()]=x});
+  for(let idx=0;idx<rows.length;idx++){
+   const row=rows[idx];
    const email=(row.querySelector('.tm-email')?.value||'').trim().toLowerCase();
-   const previous=oldArr.find(x=>(x.email||'').trim().toLowerCase()===email)||{};
+   const previous=(email&&byEmail[email])||oldArr[idx]||{};
    const f=row.querySelector('.tm-photo')?.files[0];
    let photo=previous.photo||'';
    if(f)photo=await uploadPublicMedia(await compressGalleryImage(f,900),'team');
    const permissions=defaultMemberPermissions();
    row.querySelectorAll('[data-perm]').forEach(cb=>permissions[cb.dataset.perm]=!!cb.checked);
-   arr.push({name:row.querySelector('.tm-name')?.value.trim()||'',role:row.querySelector('.tm-role')?.value.trim()||'Team Member',email,details:row.querySelector('.tm-details')?.value.trim()||'',phone:previous.phone||'',teamId:previous.teamId||'',photo,permissions});
+   const name=row.querySelector('.tm-name')?.value.trim()||'';
+   // skip completely empty rows
+   if(!name&&!email&&!photo&&!f)continue;
+   arr.push({
+     name,
+     role:row.querySelector('.tm-role')?.value.trim()||'Team Member',
+     email,
+     details:row.querySelector('.tm-details')?.value.trim()||'',
+     phone:previous.phone||'',
+     teamId:previous.teamId||'',
+     photo,
+     permissions
+   });
   }
+  // IMPORTANT: also keep old members that are not in the form (so they are not wiped)
+  const formEmails=new Set(arr.map(x=>(x.email||'').trim().toLowerCase()).filter(Boolean));
+  const formNames=new Set(arr.map(x=>(x.name||'').trim().toLowerCase()).filter(Boolean));
+  oldArr.forEach(old=>{
+    if(!old)return;
+    const em=(old.email||'').trim().toLowerCase();
+    const nm=(old.name||'').trim().toLowerCase();
+    if(em&&formEmails.has(em))return;
+    if(!em&&nm&&formNames.has(nm))return;
+    // keep old member if form didn't include them
+    if(old.name||old.photo||old.email)arr.push(old);
+  });
+  settings.teamMembers=arr;
   finalStore('mbus_team_v3',arr);
   const ok=await saveRemoteExtras('teamMembers',arr);
   if(!ok)throw new Error('Team Members online save नहीं हुए।');
-  renderTeamV3();toast('✓ Team Member की photo/details save हो गईं। सभी phones पर दिखेंगी।');
+  // refresh form so all saved members show again
+  const wrap=document.getElementById('teamManagerList');
+  if(wrap){wrap.innerHTML='';arr.forEach(x=>addTeamManagerRow(x))}
+  renderTeamV3();
+  toast('✓ Team Member photo/details save — कुल '+arr.length+' members। सभी phones पर दिखेंगे।');
  }catch(e){console.error(e);toast('❌ Team save नहीं हुआ: '+(e?.message||'Supabase Storage/RLS check करें।'))}
 }
 function renderTeamV3(){
@@ -1760,9 +1802,93 @@ function renderTeamV3(){
    pub.appendChild(c);
  });
 }
-function restoreV3(){const c=settings.committee||finalGet('mbus_committee_v3',null);if(c){document.getElementById('mPandit')&&(document.getElementById('mPandit').value=c.pandit||'');document.getElementById('mPresident')&&(document.getElementById('mPresident').value=c.president||'');document.getElementById('mTreasurer')&&(document.getElementById('mTreasurer').value=c.treasurer||'');if(c.panditPhoto)document.getElementById('panditPhoto').src=c.panditPhoto;if(c.presidentPhoto)document.getElementById('presidentPhoto').src=c.presidentPhoto;if(c.treasurerPhoto)document.getElementById('treasurerPhoto').src=c.treasurerPhoto}const t=settings.teamMembers||finalGet('mbus_team_v3',[]);const wrap=document.getElementById('teamManagerList');if(wrap&&!wrap.children.length)t.forEach(x=>addTeamManagerRow(x));renderTeamV3()}
+function restoreV3(){const c=settings.committee||finalGet('mbus_committee_v3',null);if(c){document.getElementById('mPandit')&&(document.getElementById('mPandit').value=c.pandit||'');document.getElementById('mPresident')&&(document.getElementById('mPresident').value=c.president||'');document.getElementById('mTreasurer')&&(document.getElementById('mTreasurer').value=c.treasurer||'');if(c.panditPhoto)document.getElementById('panditPhoto').src=c.panditPhoto;if(c.presidentPhoto)document.getElementById('presidentPhoto').src=c.presidentPhoto;if(c.treasurerPhoto)document.getElementById('treasurerPhoto').src=c.treasurerPhoto}const t=settings.teamMembers||finalGet('mbus_team_v3',[])||[];const wrap=document.getElementById('teamManagerList');if(wrap){wrap.innerHTML='';(t.length?t:[{}]).forEach(x=>addTeamManagerRow(x))}renderTeamPhotoManageList();renderTeamV3()}
 function saveAccessControl(){toast('👑 Owner Email fixed है: '+OWNER_EMAIL+' । Individual permissions Registered Users में set करें।')}
 function normalizePerms(p){const out={};ACCESS_KEYS.forEach(k=>out[k]=!!(p&&p[k]));return out}
+
+function getTeamMembersArr(){
+  return (settings.teamMembers||finalGet('mbus_team_v3',[])||[]).filter(x=>x&&(x.name||x.photo||x.email));
+}
+function renderTeamPhotoManageList(){
+  const box=document.getElementById('teamPhotoManageList');
+  if(!box)return;
+  const arr=getTeamMembersArr();
+  box.innerHTML='';
+  if(!arr.length){
+    box.innerHTML='<div class="user-id-empty">Abhi koi team photo / member nahi. Neeche Add karke save karo.</div>';
+    return;
+  }
+  arr.forEach((m,idx)=>{
+    const row=document.createElement('div');
+    row.className='team-photo-row';
+    const photo=m.photo||'';
+    const name=escapeHtml(m.name||'Team Member');
+    const role=escapeHtml(m.role||'');
+    const email=escapeHtml(m.email||'');
+    row.innerHTML=`
+      <div>${photo?`<img src="${String(photo).replace(/"/g,'&quot;')}" alt="">`:`<div class="photo-placeholder" style="width:72px;height:72px;border-radius:12px;display:grid;place-items:center;background:#fff8cf;font-size:28px;border:2px solid #d6a72c">👤</div>`}</div>
+      <div class="tp-meta">
+        <b>${name}</b>
+        <small>${role||'—'}</small>
+        <small>${email||'email nahi'}</small>
+        <div class="tp-actions">
+          <label>📷 Photo Change<input type="file" accept="image/*" onchange="changeTeamMemberPhoto(${idx},this)"></label>
+          <button type="button" class="tp-remove" onclick="removeTeamMemberAt(${idx})">🗑️ Remove</button>
+        </div>
+      </div>`;
+    box.appendChild(row);
+  });
+}
+async function changeTeamMemberPhoto(idx,input){
+  try{
+    const file=input?.files?.[0];
+    if(!file)return;
+    if(!requireAuthenticated())return;
+    toast('⏳ Photo upload ho rahi hai…');
+    const arr=[...(settings.teamMembers||finalGet('mbus_team_v3',[])||[])];
+    if(!arr[idx]){toast('❌ Member nahi mila');return}
+    const url=await uploadPublicMedia(await compressGalleryImage(file,900),'team');
+    arr[idx]={...arr[idx],photo:url};
+    settings.teamMembers=arr;
+    finalStore('mbus_team_v3',arr);
+    const ok=await saveRemoteExtras('teamMembers',arr);
+    if(!ok)throw new Error('Online save fail');
+    renderTeamPhotoManageList();
+    renderTeamV3();
+    // refresh form list
+    const wrap=document.getElementById('teamManagerList');
+    if(wrap){wrap.innerHTML='';arr.forEach(x=>addTeamManagerRow(x))}
+    toast('✓ Photo change ho gayi — sab phones pe update hogi');
+  }catch(e){
+    console.error(e);
+    toast('❌ Photo change nahi hui: '+(e?.message||''));
+  }finally{
+    if(input)input.value='';
+  }
+}
+async function removeTeamMemberAt(idx){
+  try{
+    if(!requireAuthenticated())return;
+    const arr=[...(settings.teamMembers||finalGet('mbus_team_v3',[])||[])];
+    if(!arr[idx])return;
+    const name=arr[idx].name||'member';
+    if(!confirm('Remove karein: '+name+' ?'))return;
+    arr.splice(idx,1);
+    settings.teamMembers=arr;
+    finalStore('mbus_team_v3',arr);
+    const ok=await saveRemoteExtras('teamMembers',arr);
+    if(!ok)throw new Error('Online save fail');
+    renderTeamPhotoManageList();
+    renderTeamV3();
+    const wrap=document.getElementById('teamManagerList');
+    if(wrap){wrap.innerHTML='';(arr.length?arr:[{}]).forEach(x=>addTeamManagerRow(x))}
+    toast('✓ Remove ho gaya');
+  }catch(e){
+    console.error(e);
+    toast('❌ Remove fail: '+(e?.message||''));
+  }
+}
+
 function makeTeamId(seed){
  const s=String(seed||'MBUS').toUpperCase();
  let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h+s.charCodeAt(i))|0;
@@ -2184,6 +2310,8 @@ function toggleManagementMenu(open){
  drawer.classList.toggle('open',!!open);overlay.classList.toggle('open',!!open);
 }
 function openManagementMenu(key){
+ try{if(String(arguments[0]||'')==='team'||String(arguments[0]||'')==='cardTeam')renderTeamPhotoManageList()}catch(_){}
+
  const target='card'+key.charAt(0).toUpperCase()+key.slice(1),cards=[...document.querySelectorAll('#managementPanel .manager-card[data-access]')];
  cards.forEach(c=>c.style.display='none');
  const el=document.getElementById(target);if(el)el.style.display='block';
@@ -3132,6 +3260,27 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important}
 #videoSoundBtn.is-hidden{display:none!important}
 @media(max-width:600px){
   #videoSoundBtn{font-size:15px;padding:13px 18px;bottom:22px}
+}
+</style>
+
+
+<style id="team-photo-manage-css">
+.team-photo-manage-list{display:grid;gap:12px}
+.team-photo-row{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center;padding:12px;border-radius:14px;background:rgba(255,255,255,.28);border:1px solid rgba(0,0,0,.18)}
+.team-photo-row img{width:72px;height:72px;object-fit:cover;border-radius:12px;border:2px solid #d6a72c;background:#fff8cf}
+.team-photo-row .tp-meta{min-width:0}
+.team-photo-row .tp-meta b{display:block;font-size:16px;margin-bottom:4px}
+.team-photo-row .tp-meta small{display:block;opacity:.8;line-height:1.4}
+.team-photo-row .tp-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.team-photo-row .tp-actions button,.team-photo-row .tp-actions label{
+  margin:0;padding:8px 12px;border-radius:9px;border:0;background:#050505;color:#ffd966;font-weight:800;cursor:pointer;font-size:13px
+}
+.team-photo-row .tp-actions label{display:inline-block}
+.team-photo-row .tp-actions input[type=file]{display:none}
+.team-photo-row .tp-remove{background:#7a1010!important;color:#fff!important}
+@media(max-width:600px){
+  .team-photo-row{grid-template-columns:64px 1fr}
+  .team-photo-row img{width:64px;height:64px}
 }
 </style>
 
