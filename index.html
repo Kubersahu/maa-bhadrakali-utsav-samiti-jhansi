@@ -1293,9 +1293,26 @@ async function openManagement(user){if(!window.MBUS_ADMIN_APP){console.info("Adm
 function closeManagement(){clearManagementFilePicker();try{localStorage.removeItem('mbus_management_active_card')}catch(e){}toggleManagementMenu(false);document.getElementById('managementPanel').classList.remove('open');document.body.style.overflow=''}
 
 function fillForm(){
- const map={mYears:'years',mNavratri:'navratri',mArrival:'arrival',mMaha:'maha',mShringar:'shringar',mMorning:'morning',mEveningAarti:'eveningAarti',mMahaAarti:'mahaAarti',mPrasad:'prasad',mPandit:'pandit',mPresident:'president',mTreasurer:'treasurer',mUpi:'upi',mDonation:'donation',mPhone:'phone',mEmail:'email',mAddress:'address',mMap:'map'};
- for(const id in map){const e=document.getElementById(id);if(e)e.value=settings[map[id]]??''}
- 
+ const map={mYears:'years',mNavratri:'navratri',mArrival:'arrival',mMaha:'maha',mShringar:'shringar',mMorning:'morning',mEveningAarti:'eveningAarti',mMahaAarti:'mahaAarti',mPandit:'pandit',mPresident:'president',mTreasurer:'treasurer',mPhone:'phone',mEmail:'email',mAddress:'address',mMap:'map'};
+ for(const id in map){const e=document.getElementById(id);if(e){const v=settings[map[id]];e.value=(v==null||typeof v==='object')?'':String(v)}}
+ // Prasad / UPI / सहयोग text — always from donation object (never put whole object in textarea)
+ const don=settings.donationData||settings.donation||finalGet('mbus_donation_final',{})||{};
+ const asText=v=>{
+   if(v==null)return '';
+   if(typeof v==='string')return v;
+   if(typeof v==='object'){
+     if(typeof v.text==='string')return v.text;
+     if(typeof v.message==='string')return v.message;
+     return '';
+   }
+   return String(v);
+ };
+ const prasadEl=document.getElementById('mPrasad');
+ if(prasadEl)prasadEl.value=asText(don.prasad||settings.prasad||'');
+ const upiEl=document.getElementById('mUpi');
+ if(upiEl)upiEl.value=asText(don.upi||settings.upi||'');
+ const donEl=document.getElementById('mDonation');
+ if(donEl)donEl.value=asText(don.donation||don.sahyog||'');
 }
 
 function render(){
@@ -1328,7 +1345,20 @@ async function loadSettings(){
    settings={...defaults,...data.settings};
    if(settings.brandSocial)finalStore('mbus_brand_social',settings.brandSocial);
    if(settings.banners)finalStore('mbus_banners',settings.banners);
-   if(settings.donation){finalStore('mbus_donation_final',settings.donation);settings.donationData=settings.donation;}
+   if(settings.donation){
+  const don=settings.donation;
+  if(don&&typeof don==='object'){
+    finalStore('mbus_donation_final',don);
+    settings.donationData=don;
+    if(typeof don.prasad==='string')settings.prasad=don.prasad;
+    if(typeof don.upi==='string')settings.upi=don.upi;
+  }else if(typeof don==='string'){
+    // legacy: donation was only a text string
+    const d={...(finalGet('mbus_donation_final',{})||{}),donation:don};
+    finalStore('mbus_donation_final',d);
+    settings.donationData=d;
+  }
+}
    if(settings.feedbackList)finalStore('mbus_feedback_remote',settings.feedbackList);
    if(settings.gallery)finalStore('mbus_gallery_final',settings.gallery);
    if(settings.committee)finalStore('mbus_committee_v3',settings.committee);
@@ -2350,11 +2380,19 @@ async function saveDonationData(){
   if(typeof d.visible!=='boolean')d.visible=!!settings.donateVisible;
   const f=document.getElementById('mQr')?.files[0];
   if(f)d.qr=await uploadPublicMedia(await compressGalleryImage(f,1200),'donation');
+  // keep plain strings on settings so fillForm never shows [object Object]
   settings.donationData=d;
+  settings.prasad=d.prasad||'';
+  settings.upi=d.upi||'';
+  // do NOT set settings.donation = d (object) — that caused [object Object]
   finalStore('mbus_donation_final',d);
   const ok=await saveRemoteExtras('donation',d);
   if(!ok)throw new Error('Donation data online save नहीं हुआ।');
-  renderDonation();toast('✓ QR / UPI save हो गया। (Section दिखाने के लिए Visibility ON करें)');
+  // also save prasad into main settings if used
+  try{await saveRemoteExtras('prasad',d.prasad||'')}catch(_){}
+  renderDonation();
+  fillForm();
+  toast('✓ प्रसाद + UPI + QR + सहयोग text save हो गया।');
  }catch(e){console.error(e);toast('❌ QR save नहीं हुआ। Supabase Storage/policy check करें।')}
 }
 function renderDonation(){
