@@ -18,6 +18,14 @@
 })();
 </script>
 
+<script>
+/* PUBLIC SITE — admin panel must never auto-open here */
+window.MBUS_ADMIN_APP=false;
+window.MBUS_PUBLIC_SITE=true;
+try{localStorage.removeItem('mbus_management_file_picker_open');localStorage.removeItem('mbus_management_file_picker_open_time');sessionStorage.removeItem('mbus_want_management')}catch(e){}
+</script>
+
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MAA BHADRAKALI UTSAV SAMITI JHANSI | नवरात्रि, आरती और महाआरती</title>
@@ -2357,6 +2365,8 @@ function toggleManagementMenu(open){
  drawer.classList.toggle('open',!!open);overlay.classList.toggle('open',!!open);
 }
 function openManagementMenu(key){
+ if(window.MBUS_PUBLIC_SITE||!window.MBUS_ADMIN_APP){return;}
+
  try{if(String(arguments[0]||'')==='team'||String(arguments[0]||'')==='cardTeam')renderTeamPhotoManageList()}catch(_){}
 
  const target='card'+key.charAt(0).toUpperCase()+key.slice(1),cards=[...document.querySelectorAll('#managementPanel .manager-card[data-access]')];
@@ -2934,6 +2944,7 @@ function filePickerGuardActive(){
   }catch(e){return false}
 }
 function restoreManagementPanelAfterFilePicker(){
+  if(window.MBUS_PUBLIC_SITE||!window.MBUS_ADMIN_APP)return;
   if(!filePickerGuardActive())return;
   try{
     const panel=document.getElementById('managementPanel');
@@ -3020,6 +3031,7 @@ sb.auth.onAuthStateChange(async (event,session)=>{
    let want=false;
    try{want=sessionStorage.getItem('mbus_want_management')==='1'}catch(_){}
    if(want){explicitManagementLogin=true;try{sessionStorage.removeItem('mbus_want_management')}catch(_){}}
+   if(window.MBUS_PUBLIC_SITE||!window.MBUS_ADMIN_APP){return}
    if(!explicitManagementLogin){return}
    explicitManagementLogin=false;
    if(filePickerGuardActive()){restoreManagementPanelAfterFilePicker();return}
@@ -3337,6 +3349,13 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important}
   .team-photo-row{grid-template-columns:64px 1fr}
   .team-photo-row img{width:64px;height:64px}
 }
+</style>
+
+
+<style id="public-no-admin-panel">
+/* Public website: never show owner management chrome by default */
+body:not(.force-admin) #managementPanel{display:none!important}
+body:not(.force-admin) #managementPanel.open{display:none!important}
 </style>
 
 </html>
